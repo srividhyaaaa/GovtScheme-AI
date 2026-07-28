@@ -1,33 +1,32 @@
 const jwt = require("jsonwebtoken");
+const User = require("../models/User");
 
-const protect = (req, res, next) => {
+const protect = async (req, res, next) => {
   try {
     let token;
 
-    // Check if Authorization header exists
     if (
       req.headers.authorization &&
       req.headers.authorization.startsWith("Bearer")
     ) {
-      // Get token from "Bearer <token>"
       token = req.headers.authorization.split(" ")[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || "default_jwt_secret");
 
-      // Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      // Attach user object without password
+      const user = await User.findById(decoded.id).select("-password");
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: "User not found or account disabled.",
+        });
+      }
 
-      // Save decoded user data to request (ensuring both _id and id are accessible)
-      req.user = {
-        _id: decoded.id,
-        id: decoded.id,
-        ...decoded,
-      };
-
-      // Continue to next middleware/route
+      req.user = user;
       next();
     } else {
       return res.status(401).json({
         success: false,
-        message: "Access denied. No token provided.",
+        message: "Access denied. No authentication token provided.",
       });
     }
   } catch (error) {

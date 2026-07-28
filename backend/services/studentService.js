@@ -1,7 +1,7 @@
-const Student = require("../models/Student");
+const User = require("../models/User");
 
-const fetchStudentProfile = async (studentId) => {
-  const student = await Student.findById(studentId)
+const getStudentProfile = async (userId) => {
+  const student = await User.findById(userId)
     .select("-password")
     .populate("savedScholarships");
 
@@ -11,70 +11,50 @@ const fetchStudentProfile = async (studentId) => {
   return student;
 };
 
-const createStudentProfile = async (studentId, profileData) => {
-  const student = await Student.findById(studentId);
+const updateStudentProfile = async (userId, profileData) => {
+  const student = await User.findById(userId);
   if (!student) {
-    throw new Error("Student account not found.");
+    throw new Error("Student not found.");
   }
 
-  // Update profile fields
-  const allowedFields = [
+  // Update profile fields if provided
+  const fields = [
+    "name",
     "phone",
+    "age",
     "gender",
-    "dob",
-    "course",
     "college",
-    "state",
+    "degree",
+    "branch",
+    "currentYear",
     "cgpa",
-    "annualIncome",
+    "percentage",
+    "familyIncome",
     "category",
-    "disability",
-    "minority",
+    "state",
+    "district",
   ];
 
-  allowedFields.forEach((field) => {
+  fields.forEach((field) => {
     if (profileData[field] !== undefined) {
       student[field] = profileData[field];
     }
   });
 
-  if (profileData.fullName) {
-    student.fullName = profileData.fullName;
+  if (profileData.specialCategories) {
+    student.specialCategories = {
+      ...student.specialCategories,
+      ...profileData.specialCategories,
+    };
   }
 
-  const updatedStudent = await student.save();
-  const result = updatedStudent.toObject();
-  delete result.password;
-  return result;
-};
-
-const updateStudentProfile = async (studentId, updateData) => {
-  const student = await Student.findById(studentId);
-  if (!student) {
-    throw new Error("Student not found.");
-  }
-
-  if (updateData.fullName !== undefined) student.fullName = updateData.fullName;
-  if (updateData.phone !== undefined) student.phone = updateData.phone;
-  if (updateData.gender !== undefined) student.gender = updateData.gender;
-  if (updateData.dob !== undefined) student.dob = updateData.dob;
-  if (updateData.course !== undefined) student.course = updateData.course;
-  if (updateData.college !== undefined) student.college = updateData.college;
-  if (updateData.state !== undefined) student.state = updateData.state;
-  if (updateData.cgpa !== undefined) student.cgpa = updateData.cgpa;
-  if (updateData.annualIncome !== undefined) student.annualIncome = updateData.annualIncome;
-  if (updateData.category !== undefined) student.category = updateData.category;
-  if (updateData.disability !== undefined) student.disability = updateData.disability;
-  if (updateData.minority !== undefined) student.minority = updateData.minority;
-
-  const updatedStudent = await student.save();
-  const result = updatedStudent.toObject();
-  delete result.password;
-  return result;
+  const updatedUser = await student.save();
+  const userObj = updatedUser.toObject();
+  delete userObj.password;
+  return userObj;
 };
 
 module.exports = {
-  fetchStudentProfile,
-  createStudentProfile,
+  getStudentProfile,
   updateStudentProfile,
 };

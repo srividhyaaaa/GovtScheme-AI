@@ -1,52 +1,52 @@
 const authService = require("../services/authService");
 
-// Register
-const register = async (req, res) => {
+// @desc    Register a new user (Student or Admin)
+// @route   POST /api/auth/register
+// @access  Public
+const register = async (req, res, next) => {
   try {
-    const result = await authService.registerStudent(req.body);
+    const result = await authService.registerUser(req.body);
     return res.status(201).json({
       success: true,
-      message: "Registration successful.",
+      message: "User registered successfully.",
       ...result,
     });
   } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(400);
+    next(error);
   }
 };
 
-// Login
-const login = async (req, res) => {
+// @desc    Authenticate user & get token
+// @route   POST /api/auth/login
+// @access  Public
+const login = async (req, res, next) => {
   try {
-    const result = await authService.loginStudent(req.body);
+    const result = await authService.loginUser(req.body);
     return res.status(200).json({
       success: true,
       message: "Login successful.",
       ...result,
     });
   } catch (error) {
-    return res.status(401).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(401);
+    next(error);
   }
 };
 
-// Get current user details from JWT token
-const getMe = async (req, res) => {
+// @desc    Get current user details
+// @route   GET /api/auth/me
+// @access  Private
+const getMe = async (req, res, next) => {
   try {
-    const student = await authService.getStudentById(req.user.id || req.user._id);
+    const user = await authService.getUserProfile(req.user._id);
     return res.status(200).json({
       success: true,
-      student,
+      user,
     });
   } catch (error) {
-    return res.status(404).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(404);
+    next(error);
   }
 };
 

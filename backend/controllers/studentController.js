@@ -1,75 +1,43 @@
 const studentService = require("../services/studentService");
 
-// @desc    Get Student Profile
+// @desc    Get current student profile
 // @route   GET /api/student/profile
 // @access  Private
-const getProfile = async (req, res) => {
+const getProfile = async (req, res, next) => {
   try {
-    const studentId = req.user.id || req.user._id;
-    const student = await studentService.fetchStudentProfile(studentId);
-
+    const profile = await studentService.getStudentProfile(req.user._id);
     return res.status(200).json({
       success: true,
-      student,
+      student: profile,
     });
   } catch (error) {
-    return res.status(404).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(404);
+    next(error);
   }
 };
 
-// @desc    Create Student Profile
-// @route   POST /api/student/profile
+// @desc    Create or Update Student Profile
+// @route   POST /api/student/profile or PUT /api/student/profile
 // @access  Private
-const createProfile = async (req, res) => {
+const updateProfile = async (req, res, next) => {
   try {
-    const studentId = req.user.id || req.user._id;
-    const student = await studentService.createStudentProfile(
-      studentId,
-      req.body
-    );
-
-    return res.status(201).json({
-      success: true,
-      message: "Profile created successfully",
-      student,
-    });
-  } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
-// @desc    Update Student Profile
-// @route   PUT /api/student/profile
-// @access  Private
-const updateProfile = async (req, res) => {
-  try {
-    const studentId = req.user.id || req.user._id;
-    const student = await studentService.updateStudentProfile(
-      studentId,
+    const updatedProfile = await studentService.updateStudentProfile(
+      req.user._id,
       req.body
     );
 
     return res.status(200).json({
       success: true,
       message: "Profile updated successfully",
-      student,
+      student: updatedProfile,
     });
   } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(400);
+    next(error);
   }
 };
 
 module.exports = {
   getProfile,
-  createProfile,
   updateProfile,
 };

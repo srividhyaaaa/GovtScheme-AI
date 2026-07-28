@@ -1,83 +1,87 @@
-const Student = require("../models/Student");
+const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET || "default_jwt_secret", {
-    expiresIn: "7d",
-  });
+const generateToken = (id, role) => {
+  return jwt.sign(
+    { id, role },
+    process.env.JWT_SECRET || "default_jwt_secret",
+    { expiresIn: "7d" }
+  );
 };
 
-const registerStudent = async ({ fullName, email, password }) => {
-  if (!fullName || !email || !password) {
-    throw new Error("Please fill all required fields.");
+const registerUser = async ({ name, email, password, role = "Student" }) => {
+  if (!name || !email || !password) {
+    throw new Error("Please provide name, email, and password.");
   }
 
-  const existingStudent = await Student.findOne({ email });
-  if (existingStudent) {
-    throw new Error("Email already registered.");
+  const existingUser = await User.findOne({ email: email.toLowerCase() });
+  if (existingUser) {
+    throw new Error("User email already registered.");
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const student = await Student.create({
-    fullName,
-    email,
+  const user = await User.create({
+    name,
+    email: email.toLowerCase(),
     password: hashedPassword,
+    role: role === "Admin" ? "Admin" : "Student",
   });
 
-  const token = generateToken(student._id);
+  const token = generateToken(user._id, user.role);
 
   return {
-    student: {
-      id: student._id,
-      fullName: student.fullName,
-      email: student.email,
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
     },
     token,
   };
 };
 
-const loginStudent = async ({ email, password }) => {
+const loginUser = async ({ email, password }) => {
   if (!email || !password) {
     throw new Error("Please provide email and password.");
   }
 
-  const student = await Student.findOne({ email });
-  if (!student) {
-    throw new Error("Invalid email or password.");
+  const user = await User.findOne({ email: email.toLowerCase() });
+  if (!user) {
+    throw new Error("Invalid credentials.");
   }
 
-  const isMatch = await bcrypt.compare(password, student.password);
+  const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    throw new Error("Invalid email or password.");
+    throw new Error("Invalid credentials.");
   }
 
-  const token = generateToken(student._id);
+  const token = generateToken(user._id, user.role);
 
   return {
-    student: {
-      id: student._id,
-      fullName: student.fullName,
-      email: student.email,
-      phone: student.phone,
-      category: student.category,
-      state: student.state,
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      state: user.state,
+      category: user.category,
     },
     token,
   };
 };
 
-const getStudentById = async (studentId) => {
-  const student = await Student.findById(studentId).select("-password");
-  if (!student) {
-    throw new Error("Student not found.");
+const getUserProfile = async (userId) => {
+  const user = await User.findById(userId).select("-password").populate("savedScholarships");
+  if (!user) {
+    throw new Error("User not found.");
   }
-  return student;
+  return user;
 };
 
 module.exports = {
   generateToken,
-  registerStudent,
-  loginStudent,
-  getStudentById,
+  registerUser,
+  loginUser,
+  getUserProfile,
 };

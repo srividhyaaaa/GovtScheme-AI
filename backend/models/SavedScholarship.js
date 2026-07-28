@@ -2,9 +2,9 @@ const mongoose = require("mongoose");
 
 const savedScholarshipSchema = new mongoose.Schema(
   {
-    student: {
+    user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Student",
+      ref: "User",
       required: true,
     },
     scholarship: {
@@ -22,7 +22,6 @@ const savedScholarshipSchema = new mongoose.Schema(
   }
 );
 
-// Prevent duplicate saves by the same student for the same scholarship
-savedScholarshipSchema.index({ student: 1, scholarship: 1 }, { unique: true });
+savedScholarshipSchema.index({ user: 1, scholarship: 1 }, { unique: true });
 
 module.exports = mongoose.model("SavedScholarship", savedScholarshipSchema);
