@@ -25,17 +25,15 @@ const getScholarships = async (req, res, next) => {
 // @access  Public
 const searchScholarships = async (req, res, next) => {
   try {
-    const { q, category, state, course } = req.query;
-    const result = await scholarshipService.searchScholarships(q, {
-      category,
-      state,
-      course,
-    });
+        const { q } = req.query;
+    const result = await scholarshipService.searchScholarships(q, req.query);
 
     return res.status(200).json({
       success: true,
       count: result.scholarships.length,
       total: result.total,
+      page: result.page,
+      pages: result.pages,
       scholarships: result.scholarships,
     });
   } catch (error) {

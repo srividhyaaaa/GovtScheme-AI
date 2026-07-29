@@ -1,47 +1,173 @@
 const Scholarship = require("../models/Scholarship");
 
-const getAllScholarships = async (queryParams = {}) => {
-  const {
-    category,
-    state,
-    minAmount,
-    maxAmount,
-    provider,
-    isActive,
-    page = 1,
-    limit = 20,
-  } = queryParams;
+const parseNumber = (value, fallback = null) => {
+  const number = Number(value);
+  return Number.isNaN(number) ? fallback : number;
+};
 
-  const filter = {};
+const parseDate = (value) => {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
 
-  if (category) {
-    filter.category = { $regex: category, $options: "i" };
-  }
-
-  if (state) {
-    filter.state = { $regex: state, $options: "i" };
-  }
-
-  if (provider) {
-    filter.provider = { $regex: provider, $options: "i" };
-  }
-
-  if (minAmount || maxAmount) {
-    filter.amount = {};
-    if (minAmount) filter.amount.$gte = Number(minAmount);
-    if (maxAmount) filter.amount.$lte = Number(maxAmount);
-  }
-
-  if (isActive !== undefined) {
-    filter.isActive = isActive === "true" || isActive === true;
-  }
-
-  const pageNum = parseInt(page, 10);
-  const limitNum = parseInt(limit, 10);
+const parsePagination = (queryParams = {}) => {
+  const pageNum = Math.max(1, parseNumber(queryParams.page, 1));
+  const limitNum = Math.max(1, parseNumber(queryParams.limit, 20));
   const skip = (pageNum - 1) * limitNum;
 
+  return { pageNum, limitNum, skip };
+};
+
+const buildFilter = (queryParams = {}) => {
+  const filter = {};
+
+  if (queryParams.category) {
+    filter.category = { $regex: queryParams.category, $options: "i" };
+  }
+
+  if (queryParams.state) {
+    filter.state = { $regex: queryParams.state, $options: "i" };
+  }
+
+  if (queryParams.course) {
+    filter.course = { $regex: queryParams.course, $options: "i" };
+  }
+
+  if (queryParams.gender) {
+    filter.gender = { $regex: queryParams.gender, $options: "i" };
+  }
+
+  if (queryParams.provider) {
+    filter.provider = { $regex: queryParams.provider, $options: "i" };
+  }
+
+  if (queryParams.title) {
+    filter.title = { $regex: queryParams.title, $options: "i" };
+  }
+
+  if (queryParams.minAmount || queryParams.maxAmount || queryParams.amount) {
+    const amountFilter = {};
+
+    if (queryParams.amount) {
+      const amountValue = queryParams.amount.toString().trim();
+      const range = amountValue.split("-").map((value) => value.trim()).filter(Boolean);
+      if (range.length === 2) {
+        const min = parseNumber(range[0]);
+        const max = parseNumber(range[1]);
+        if (min !== null) amountFilter.$gte = min;
+        if (max !== null) amountFilter.$lte = max;
+      } else {
+        const exact = parseNumber(amountValue);
+        if (exact !== null) {
+          amountFilter.$gte = exact;
+        }
+      }
+    }
+
+    if (queryParams.minAmount) {
+      const min = parseNumber(queryParams.minAmount);
+      if (min !== null) amountFilter.$gte = min;
+    }
+    if (queryParams.maxAmount) {
+      const max = parseNumber(queryParams.maxAmount);
+      if (max !== null) amountFilter.$lte = max;
+    }
+
+    if (Object.keys(amountFilter).length) {
+      filter.amount = amountFilter;
+    }
+  }
+
+  if (queryParams.income) {
+    const income = parseNumber(queryParams.income);
+    if (income !== null) {
+      filter.$or = [
+        { incomeLimit: { $gte: income } },
+        { incomeLimit: 0 },
+      ];
+    }
+  }
+
+  const deadlineQuery = {};
+  if (queryParams.deadlineBefore) {
+    const beforeDate = parseDate(queryParams.deadlineBefore);
+    if (beforeDate) deadlineQuery.$lte = beforeDate;
+  }
+  if (queryParams.deadlineAfter) {
+    const afterDate = parseDate(queryParams.deadlineAfter);
+    if (afterDate) deadlineQuery.$gte = afterDate;
+  }
+  if (queryParams.deadline) {
+    const exactDate = parseDate(queryParams.deadline);
+    if (exactDate) deadlineQuery.$eq = exactDate;
+  }
+  if (Object.keys(deadlineQuery).length) {
+    filter.deadline = deadlineQuery;
+  }
+
+  if (queryParams.isActive !== undefined) {
+    filter.isActive =
+      queryParams.isActive === "true" || queryParams.isActive === true;
+  }
+
+  return filter;
+};
+
+const buildSort = (queryParams = {}, useTextScore = false) => {
+  const sortParam = (queryParams.sortBy || queryParams.sort || "").toString().trim().toLowerCase();
+  const order = (queryParams.order || "desc").toString().trim().toLowerCase();
+  const direction = order === "asc" ? 1 : -1;
+  const sort = {};
+
+  if (useTextScore && (!sortParam || sortParam === "relevance")) {
+    sort.score = { $meta: "textScore" };
+    sort.createdAt = -1;
+    return sort;
+  }
+
+  switch (sortParam) {
+    case "amount":
+      sort.amount = direction;
+      break;
+    case "deadline":
+      sort.deadline = direction;
+      break;
+    case "newest":
+      sort.createdAt = -1;
+      break;
+    case "oldest":
+      sort.createdAt = 1;
+      break;
+    case "income":
+      sort.incomeLimit = direction;
+      break;
+    case "title":
+      sort.title = direction;
+      break;
+    case "provider":
+      sort.provider = direction;
+      break;
+    case "state":
+      sort.state = direction;
+      break;
+    default:
+      sort.createdAt = -1;
+  }
+
+  if (useTextScore && sortParam !== "relevance") {
+    sort.score = { $meta: "textScore" };
+  }
+
+  return sort;
+};
+
+const getAllScholarships = async (queryParams = {}) => {
+  const filter = buildFilter(queryParams);
+  const { pageNum, limitNum, skip } = parsePagination(queryParams);
+  const sort = buildSort(queryParams, false);
+
   const scholarships = await Scholarship.find(filter)
-    .sort({ createdAt: -1 })
+    .sort(sort)
     .skip(skip)
     .limit(limitNum);
 
@@ -63,33 +189,34 @@ const getScholarshipById = async (id) => {
   return scholarship;
 };
 
-const searchScholarships = async (searchTerm, additionalFilters = {}) => {
+const searchScholarships = async (searchTerm, queryParams = {}) => {
   if (!searchTerm || searchTerm.trim() === "") {
-    return getAllScholarships(additionalFilters);
+    return getAllScholarships(queryParams);
   }
 
-  const regexQuery = new RegExp(searchTerm.trim(), "i");
+  const filter = buildFilter(queryParams);
+  const { pageNum, limitNum, skip } = parsePagination(queryParams);
+  const sort = buildSort(queryParams, true);
+
   const query = {
-    $or: [
-      { title: regexQuery },
-      { provider: regexQuery },
-      { description: regexQuery },
-      { category: regexQuery },
-      { state: regexQuery },
-    ],
+    ...filter,
+    $text: { $search: searchTerm.trim() },
   };
 
-  if (additionalFilters.category) {
-    query.category = { $regex: additionalFilters.category, $options: "i" };
-  }
-  if (additionalFilters.state) {
-    query.state = { $regex: additionalFilters.state, $options: "i" };
-  }
+  const scholarships = await Scholarship.find(query, {
+    score: { $meta: "textScore" },
+  })
+    .sort(sort)
+    .skip(skip)
+    .limit(limitNum);
 
-  const scholarships = await Scholarship.find(query).sort({ createdAt: -1 });
+  const total = await Scholarship.countDocuments(query);
+
   return {
     scholarships,
-    total: scholarships.length,
+    total,
+    page: pageNum,
+    pages: Math.ceil(total / limitNum),
   };
 };
 
