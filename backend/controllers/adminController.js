@@ -2,6 +2,11 @@ const User = require("../models/User");
 const Scholarship = require("../models/Scholarship");
 const Application = require("../models/Application");
 
+const toNumber = (value, fallback = 0) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
 // @desc    Get Admin Dashboard Statistics
 // @route   GET /api/admin/stats
 // @access  Private / Admin
@@ -110,9 +115,250 @@ const updateApplicationStatus = async (req, res, next) => {
   }
 };
 
+const getTopScholarships = async (req, res) => {
+  try {
+    const scholarships = await Scholarship.find({ isActive: true })
+      .sort({ amount: -1, createdAt: -1 })
+      .limit(5);
+
+    return res.status(200).json({
+      success: true,
+      scholarships,
+    });
+  } catch (error) {
+    console.error("Top scholarships error:", error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to fetch top scholarships.",
+    });
+  }
+};
+
+const getApplicationAnalytics = async (req, res) => {
+  try {
+    const totalApplications = await Application.countDocuments();
+    const approved = await Application.countDocuments({ status: "Approved" });
+    const rejected = await Application.countDocuments({ status: "Rejected" });
+    const underReview = await Application.countDocuments({ status: "Under Review" });
+    const pending = await Application.countDocuments({ status: { $in: ["Applied", "Pending", "Draft"] } });
+
+    const conversionRate = totalApplications > 0 ? Math.round((approved / totalApplications) * 100) : 0;
+
+    return res.status(200).json({
+      success: true,
+      analytics: {
+        totalApplications,
+        approved,
+        rejected,
+        underReview,
+        pending,
+        conversionRate,
+      },
+    });
+  } catch (error) {
+    console.error("Application analytics error:", error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to fetch application analytics.",
+    });
+  }
+};
+
+const getScholarshipPopularity = async (req, res) => {
+  try {
+    const popularity = await Application.aggregate([
+      { $group: { _id: "$scholarship", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 5 },
+    ]);
+
+    const scholarships = await Scholarship.find({ _id: { $in: popularity.map((item) => item._id) } });
+    const scholarshipMap = new Map(scholarships.map((item) => [item._id.toString(), item]));
+
+    const ranked = popularity.map((item) => ({
+      scholarshipId: item._id,
+      title: scholarshipMap.get(item._id.toString())?.title || "Unknown Scholarship",
+      applications: item.count,
+    }));
+
+    return res.status(200).json({
+      success: true,
+      popularity: ranked,
+    });
+  } catch (error) {
+    console.error("Scholarship popularity error:", error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to fetch scholarship popularity.",
+    });
+  }
+};
+
+const getMostEligibleStudents = async (req, res) => {
+  try {
+    const applications = await Application.find({ status: { $in: ["Applied", "Under Review", "Approved"] } })
+      .populate("student", "name email cgpa state category course")
+      .sort({ createdAt: -1 })
+      .limit(10);
+
+    const eligibleStudents = applications
+      .filter((item) => item.student)
+      .map((item) => ({
+        student: item.student,
+        scholarshipId: item.scholarship,
+        status: item.status,
+      }));
+
+    return res.status(200).json({
+      success: true,
+      eligibleStudents,
+    });
+  } catch (error) {
+    console.error("Most eligible students error:", error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to fetch eligible students.",
+    });
+  }
+};
+
+const getDeadlineAlerts = async (req, res) => {
+  try {
+    const now = new Date();
+    const scholarships = await Scholarship.find({ isActive: true, deadline: { $gte: now } })
+      .sort({ deadline: 1 })
+      .limit(10);
+
+    const alerts = scholarships.map((scholarship) => {
+      const daysRemaining = Math.ceil((new Date(scholarship.deadline) - now) / (1000 * 60 * 60 * 24));
+      return {
+        scholarshipId: scholarship._id,
+        title: scholarship.title,
+        deadline: scholarship.deadline,
+        daysRemaining,
+      };
+    });
+
+    return res.status(200).json({
+      success: true,
+      deadlineAlerts: alerts,
+    });
+  } catch (error) {
+    console.error("Deadline alerts error:", error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to fetch deadline alerts.",
+    });
+  }
+};
+
+const getAverageMatchScore = async (req, res) => {
+  try {
+    const applications = await Application.find();
+    const scores = applications
+      .map((item) => toNumber(item.matchScore || item.score || 0, 0))
+      .filter((score) => score > 0);
+
+    const averageMatchScore = scores.length > 0
+      ? Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length)
+      : 0;
+
+    return res.status(200).json({
+      success: true,
+      averageMatchScore,
+    });
+  } catch (error) {
+    console.error("Average match score error:", error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to calculate average match score.",
+    });
+  }
+};
+
+const getApplicationConversionRate = async (req, res) => {
+  try {
+    const totalApplications = await Application.countDocuments();
+    const approved = await Application.countDocuments({ status: "Approved" });
+    const conversionRate = totalApplications > 0 ? Math.round((approved / totalApplications) * 100) : 0;
+
+    return res.status(200).json({
+      success: true,
+      conversionRate,
+    });
+  } catch (error) {
+    console.error("Application conversion rate error:", error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to calculate conversion rate.",
+    });
+  }
+};
+
+const getRecentActivities = async (req, res) => {
+  try {
+    const applications = await Application.find()
+      .populate("student", "name email")
+      .populate("scholarship", "title")
+      .sort({ createdAt: -1 })
+      .limit(10);
+
+    const activities = applications.map((item) => ({
+      id: item._id,
+      student: item.student?.name || "Unknown Student",
+      scholarship: item.scholarship?.title || "Unknown Scholarship",
+      status: item.status,
+      createdAt: item.createdAt,
+    }));
+
+    return res.status(200).json({
+      success: true,
+      recentActivities: activities,
+    });
+  } catch (error) {
+    console.error("Recent activities error:", error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to fetch recent activities.",
+    });
+  }
+};
+
+const getDashboardSummary = async (req, res) => {
+  try {
+    const stats = await getDashboardStats(req, res, () => {});
+    if (stats) {
+      return res.status(200).json({
+        success: true,
+        dashboard: {
+          stats: stats?.locals?.stats || {},
+        },
+      });
+    }
+  } catch (error) {
+    console.error("Dashboard summary error:", error.message);
+  }
+
+  return res.status(200).json({
+    success: true,
+    dashboard: {
+      stats: {},
+    },
+  });
+};
+
 module.exports = {
   getDashboardStats,
   getAllUsers,
   getAllApplications,
   updateApplicationStatus,
+  getTopScholarships,
+  getApplicationAnalytics,
+  getScholarshipPopularity,
+  getMostEligibleStudents,
+  getDeadlineAlerts,
+  getAverageMatchScore,
+  getApplicationConversionRate,
+  getRecentActivities,
+  getDashboardSummary,
 };

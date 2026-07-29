@@ -7,6 +7,15 @@ const {
   getAllUsers,
   getAllApplications,
   updateApplicationStatus,
+  getTopScholarships,
+  getApplicationAnalytics,
+  getScholarshipPopularity,
+  getMostEligibleStudents,
+  getDeadlineAlerts,
+  getAverageMatchScore,
+  getApplicationConversionRate,
+  getRecentActivities,
+  getDashboardSummary,
 } = require("../controllers/adminController");
 const {
   createScholarship,
@@ -20,6 +29,15 @@ router.use(adminOnly);
 
 // Dashboard Statistics
 router.get("/stats", getDashboardStats);
+router.get("/dashboard", getDashboardSummary);
+router.get("/top-scholarships", getTopScholarships);
+router.get("/application-analytics", getApplicationAnalytics);
+router.get("/scholarship-popularity", getScholarshipPopularity);
+router.get("/most-eligible-students", getMostEligibleStudents);
+router.get("/deadline-alerts", getDeadlineAlerts);
+router.get("/average-match-score", getAverageMatchScore);
+router.get("/application-conversion-rate", getApplicationConversionRate);
+router.get("/recent-activities", getRecentActivities);
 
 // Manage Users
 router.get("/users", getAllUsers);
