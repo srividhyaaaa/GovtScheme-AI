@@ -42,11 +42,12 @@ function Home() {
           government scheme recommendations instantly.
         </p>
 
-        <ul>
+        <ul className="ai-assistant-list">
           <li>✔ Personalized Suggestions</li>
           <li>✔ Eligibility Check</li>
           <li>✔ Multi-language Support</li>
           <li>✔ Free to Use</li>
+          <li>✔ GPT-powered Scheme Guidance</li>
         </ul>
 
       </div>
