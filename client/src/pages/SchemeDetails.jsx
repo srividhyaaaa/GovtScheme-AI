@@ -1,43 +1,35 @@
 import { Link, useParams } from "react-router-dom";
 import schemes from "../data/schemes";
 
+function SchemeDetails() {
 
-function SchemeDetails(){
-
-    const {id} = useParams();
-
+    const { id } = useParams();
 
     const scheme = schemes.find(
-        (item)=> item.id === Number(id)
+        (item) => item.id === Number(id)
     );
 
+    if (!scheme) {
 
-    if(!scheme){
-
-        return(
+        return (
             <div className="not-found">
 
-                <h2>
-                    Scheme Not Found
-                </h2>
+                <h2>Scheme Not Found</h2>
 
                 <Link to="/schemes">
                     Go Back
                 </Link>
 
             </div>
-        )
+        );
 
     }
 
-
-    return(
+    return (
 
         <div className="scheme-details-page">
 
-
             <div className="details-card">
-
 
                 <div className="details-header">
 
@@ -45,15 +37,11 @@ function SchemeDetails(){
                         🏛️
                     </div>
 
-
                     <div>
 
-                        <h1>
-                            {scheme.name}
-                        </h1>
+                        <h1>{scheme.name}</h1>
 
-
-                        <span>
+                        <span className="scheme-category">
                             {scheme.category}
                         </span>
 
@@ -61,107 +49,67 @@ function SchemeDetails(){
 
                 </div>
 
-
-
                 <hr />
-
-
 
                 <div className="details-section">
 
+                    <h3>Overview</h3>
+                    <p>{scheme.description}</p>
 
-                    <h3>
-                        🏢 Ministry
-                    </h3>
+                    <h3>Ministry</h3>
+                    <p>{scheme.ministry}</p>
 
-                    <p>
-                        {scheme.ministry}
-                    </p>
+                    <h3>Category</h3>
+                    <p>{scheme.category}</p>
 
+                    <h3>Eligibility</h3>
+                    <p>{scheme.eligibility}</p>
 
+                    <h3>Benefits</h3>
+                    <p>{scheme.benefits}</p>
 
-                    <h3>
-                        ✅ Eligibility
-                    </h3>
+                    <h3>Application Mode</h3>
+                    <p>{scheme.applicationMode}</p>
 
-                    <p>
-                        {scheme.eligibility}
-                    </p>
+                    <h3>Application Deadline</h3>
+                    <p>{scheme.deadline}</p>
 
-
-
-                    <h3>
-                        🎁 Benefits
-                    </h3>
-
-                    <p>
-                        {scheme.benefits}
-                    </p>
-
-
-
-                    <h3>
-                        📄 Required Documents
-                    </h3>
-
+                    <h3>Required Documents</h3>
 
                     <ul>
-
-                        <li>
-                            Aadhaar Card
-                        </li>
-
-                        <li>
-                            Income Certificate
-                        </li>
-
-                        <li>
-                            Bank Account Details
-                        </li>
-
-                        <li>
-                            Address Proof
-                        </li>
-
+                        {scheme.documents.map((doc, index) => (
+                            <li key={index}>{doc}</li>
+                        ))}
                     </ul>
 
-
-
                 </div>
-
-
 
                 <div className="details-buttons">
 
-
-                    <button className="apply-btn">
-
-                        Apply Now
-
-                    </button>
-
-
-                    <Link 
-                    to="/schemes"
-                    className="back-btn"
+                    <a
+                        href={scheme.apply}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="apply-btn"
                     >
+                        Apply Now
+                    </a>
 
+                    <Link
+                        to="/schemes"
+                        className="back-btn"
+                    >
                         Back to Schemes
-
                     </Link>
-
 
                 </div>
 
-
             </div>
-
 
         </div>
 
-    )
+    );
 
 }
-
 
 export default SchemeDetails;

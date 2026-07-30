@@ -26,7 +26,7 @@ function SchemeCard({ scheme }) {
       <div className="scheme-info">
 
         <p>
-          🏛️ <b>Ministry:</b>
+           <b>Ministry:</b>
         </p>
 
         <span>
@@ -35,7 +35,7 @@ function SchemeCard({ scheme }) {
 
 
         <p>
-          ✅ <b>Eligibility:</b>
+           <b>Eligibility:</b>
         </p>
 
         <span>
@@ -45,7 +45,7 @@ function SchemeCard({ scheme }) {
 
 
         <p>
-          🎁 <b>Benefits:</b>
+           <b>Benefits:</b>
         </p>
 
         <span>

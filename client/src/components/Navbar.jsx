@@ -22,10 +22,9 @@ function Navbar() {
 
 
       <div className="logo">
-
-        🇮🇳 <span>GovAssist AI</span>
-
-      </div>
+        <img src="/logo.png" alt="GovAssist AI" />
+        <span>GovAssist AI</span>
+  </div>
 
 
 
