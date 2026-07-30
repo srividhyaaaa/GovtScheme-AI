@@ -13,7 +13,23 @@ function Login() {
       "true"
     );
 
-    navigate("/profile");
+    const savedProfile = localStorage.getItem("userProfile");
+
+    if (savedProfile) {
+      try {
+        const parsedProfile = JSON.parse(savedProfile);
+        const hasProfileData = Object.values(parsedProfile).some(
+          (value) => value !== "" && value !== null && value !== undefined
+        );
+
+        navigate(hasProfileData ? "/dashboard" : "/profile");
+      } catch (error) {
+        console.error("Failed to parse saved profile", error);
+        navigate("/profile");
+      }
+    } else {
+      navigate("/profile");
+    }
   };
 
 

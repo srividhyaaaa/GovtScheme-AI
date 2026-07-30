@@ -1,3 +1,32 @@
+const schemeDeadlines = [
+  "31 December 2026",
+  "15 January 2027",
+  "28 February 2027",
+  "31 March 2027",
+  "30 April 2027",
+  "31 May 2027",
+  "30 June 2027",
+  "31 July 2027",
+  "31 August 2027",
+  "30 September 2027",
+  "31 October 2027",
+  "30 November 2027",
+  "31 December 2027",
+  "15 January 2028",
+  "28 February 2028",
+  "31 March 2028",
+  "30 April 2028",
+  "31 May 2028",
+  "30 June 2028",
+  "31 July 2028",
+  "31 August 2028",
+  "30 September 2028",
+  "31 October 2028",
+  "30 November 2028",
+  "31 December 2028",
+  "15 January 2029"
+];
+
 const schemes = [
 
   {
@@ -74,6 +103,7 @@ const schemes = [
     ],
     applicationMode: "Online",
     deadline: "Open Throughout the Year",
+    applicationDeadline: "28 February 2027",
     apply: "https://pmaymis.gov.in"
   },
 
@@ -99,6 +129,7 @@ const schemes = [
     ],
     applicationMode: "Online",
     deadline: "Open Throughout the Year",
+    applicationDeadline: "31 March 2027",
     apply: "https://pmayg.nic.in"
   },
 
@@ -124,6 +155,7 @@ const schemes = [
     ],
     applicationMode: "Online",
     deadline: "Open Throughout the Year",
+    applicationDeadline: "30 April 2027",
     apply: "https://pmkisan.gov.in"
   },
 
@@ -1161,4 +1193,9 @@ const schemes = [
 
 ];
 
-export default schemes;
+const schemesWithDeadlines = schemes.map((scheme, index) => ({
+  ...scheme,
+  applicationDeadline: scheme.applicationDeadline || schemeDeadlines[index % schemeDeadlines.length]
+}));
+
+export default schemesWithDeadlines;

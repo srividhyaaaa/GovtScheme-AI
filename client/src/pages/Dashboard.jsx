@@ -14,13 +14,37 @@ function Dashboard(){
 
         const profile =
         JSON.parse(
-            localStorage.getItem("userProfile")
+            localStorage.getItem("userProfile") || "null"
         );
 
 
         if(!profile){
             return;
         }
+
+
+        const parsedAge = Number(profile.age);
+        const parsedIncome = Number(profile.income);
+        const occupation =
+            (profile.occupation || "")
+            .toString()
+            .trim()
+            .toLowerCase();
+        const gender =
+            (profile.gender || "")
+            .toString()
+            .trim()
+            .toLowerCase();
+
+        const isStudent = occupation.includes("student");
+        const isFarmer = occupation.includes("farmer");
+        const isBusinessOwner =
+            occupation.includes("business") ||
+            occupation.includes("owner") ||
+            occupation.includes("entrepreneur") ||
+            occupation.includes("msme");
+        const isSeniorCitizen = parsedAge >= 60;
+        const isWoman = gender === "female" || gender === "woman";
 
 
 
@@ -32,59 +56,127 @@ function Dashboard(){
             let reasons = [];
 
 
-            const criteria =
-            scheme.eligibilityCriteria;
+            const criteria = scheme.eligibilityCriteria || {};
+            const schemeName = (scheme.name || "").toLowerCase();
+            const schemeCategory = (scheme.category || "").toLowerCase();
+            const occupationCriteria =
+                (criteria.occupation || "")
+                .toString()
+                .toLowerCase();
+            const genderCriteria =
+                (criteria.gender || "")
+                .toString()
+                .toLowerCase();
 
 
+            if(isStudent){
 
-            // Occupation Match
+                if(
+                    occupationCriteria === "student" ||
+                    schemeCategory.includes("scholarship") ||
+                    schemeCategory.includes("skill") ||
+                    schemeName.includes("education") ||
+                    schemeName.includes("scholar")
+                ){
 
-            if(
-                criteria.occupation === "Any" ||
-                criteria.occupation === profile.occupation
-            ){
+                    score += 70;
+                    reasons.push("Matches your student profile");
 
-                score += 40;
-
-                reasons.push(
-                    "Occupation criteria matched"
-                );
-
-            }
-
-
-
-            // Income Match
-
-            if(
-                Number(profile.income)
-                <=
-                criteria.income
-            ){
-
-                score += 30;
-
-                reasons.push(
-                    "Income criteria satisfied"
-                );
+                }
 
             }
 
 
+            if(isFarmer){
 
-            // Age Match
+                if(
+                    occupationCriteria === "farmer" ||
+                    schemeCategory.includes("agriculture") ||
+                    schemeName.includes("kisan") ||
+                    schemeName.includes("fasal") ||
+                    schemeName.includes("soil")
+                ){
+
+                    score += 70;
+                    reasons.push("Matches your farming profile");
+
+                }
+
+            }
+
+
+            if(isBusinessOwner){
+
+                if(
+                    occupationCriteria.includes("entrepreneur") ||
+                    occupationCriteria.includes("msme") ||
+                    schemeName.includes("msme") ||
+                    schemeCategory.includes("business") ||
+                    schemeCategory.includes("support")
+                ){
+
+                    score += 70;
+                    reasons.push("Matches your business profile");
+
+                }
+
+            }
+
+
+            if(isSeniorCitizen){
+
+                if(
+                    schemeCategory.includes("pension") ||
+                    schemeCategory.includes("welfare") ||
+                    schemeName.includes("pension") ||
+                    schemeName.includes("welfare")
+                ){
+
+                    score += 70;
+                    reasons.push("Matches your senior citizen profile");
+
+                }
+
+            }
+
+
+            if(isWoman){
+
+                if(
+                    genderCriteria === "female" ||
+                    schemeName.includes("sukanya") ||
+                    schemeName.includes("women") ||
+                    schemeName.includes("girl")
+                ){
+
+                    score += 50;
+                    reasons.push("Matches your gender-based eligibility");
+
+                }
+
+            }
+
 
             if(
-                Number(profile.age)
+                Number(parsedIncome)
                 <=
-                criteria.age
+                Number(criteria.income)
             ){
 
-                score += 30;
+                score += 15;
+                reasons.push("Income criteria satisfied");
 
-                reasons.push(
-                    "Age criteria satisfied"
-                );
+            }
+
+
+            if(
+                Number(parsedAge)
+                <=
+                Number(criteria.age)
+            ){
+
+                score += 15;
+                reasons.push("Age criteria satisfied");
 
             }
 
@@ -109,7 +201,7 @@ function Dashboard(){
 
             results
             .filter(
-                scheme=>scheme.match>=50
+                scheme=>scheme.match>=70
             )
             .sort(
                 (a,b)=>b.match-a.match

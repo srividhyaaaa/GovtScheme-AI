@@ -53,6 +53,15 @@ function SchemeCard({ scheme }) {
         </span>
 
 
+        <p>
+           <b>Application Deadline:</b>
+        </p>
+
+        <span>
+          {scheme.applicationDeadline || scheme.deadline}
+        </span>
+
+
       </div>
 
 

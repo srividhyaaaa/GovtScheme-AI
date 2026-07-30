@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 
@@ -18,6 +18,27 @@ function Profile(){
         category:""
 
     });
+
+
+    useEffect(() => {
+
+        const savedProfile = localStorage.getItem("userProfile");
+
+        if (savedProfile) {
+
+            try {
+
+                setProfile(JSON.parse(savedProfile));
+
+            } catch (error) {
+
+                console.error("Failed to load saved profile", error);
+
+            }
+
+        }
+
+    }, []);
 
 
 
@@ -81,6 +102,7 @@ function Profile(){
                     <input
                     name="name"
                     placeholder="Full Name"
+                    value={profile.name}
                     onChange={handleChange}
                     required
                     />
@@ -90,6 +112,7 @@ function Profile(){
                     name="age"
                     placeholder="Age"
                     type="number"
+                    value={profile.age}
                     onChange={handleChange}
                     required
                     />
@@ -98,6 +121,7 @@ function Profile(){
 
                     <select
                     name="gender"
+                    value={profile.gender}
                     onChange={handleChange}
                     required
                     >
@@ -125,6 +149,7 @@ function Profile(){
                     <input
                     name="state"
                     placeholder="State"
+                    value={profile.state}
                     onChange={handleChange}
                     required
                     />
@@ -134,6 +159,7 @@ function Profile(){
                     <input
                     name="income"
                     placeholder="Annual Income"
+                    value={profile.income}
                     onChange={handleChange}
                     required
                     />
@@ -143,6 +169,7 @@ function Profile(){
                     <input
                     name="occupation"
                     placeholder="Occupation"
+                    value={profile.occupation}
                     onChange={handleChange}
                     required
                     />
@@ -151,6 +178,7 @@ function Profile(){
 
                     <select
                     name="category"
+                    value={profile.category}
                     onChange={handleChange}
                     required
                     >

@@ -72,7 +72,7 @@ function SchemeDetails() {
                     <p>{scheme.applicationMode}</p>
 
                     <h3>Application Deadline</h3>
-                    <p>{scheme.deadline}</p>
+                    <p>{scheme.applicationDeadline || scheme.deadline}</p>
 
                     <h3>Required Documents</h3>
 
