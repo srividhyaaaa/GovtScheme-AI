@@ -1,20 +1,40 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useAuth } from "../../hooks/useAuth";
+import { register as registerRequest } from "../../services/authService";
+import { getDefaultRedirect } from "../../utils/authUtils";
 
 function Register() {
-
   const navigate = useNavigate();
+  const { login } = useAuth();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
+    setError(null);
 
-    // Temporary registration simulation
-    localStorage.setItem(
-      "userLoggedIn",
-      "true"
-    );
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
 
-    navigate("/profile");
+    setLoading(true);
+
+    try {
+      const response = await registerRequest({ name, email, password });
+      login(response.token, response.user);
+      const redirectPath = getDefaultRedirect(response.user);
+      navigate(redirectPath, { replace: true });
+    } catch (err) {
+      setError(err.response?.data?.message || "Unable to register. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
 
@@ -38,6 +58,8 @@ function Register() {
           <label>Full Name</label>
           <input
             type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             placeholder="Enter Full Name"
             required
           />
@@ -47,7 +69,6 @@ function Register() {
           <input
             type="text"
             placeholder="XXXX XXXX XXXX"
-            required
           />
 
 
@@ -55,13 +76,14 @@ function Register() {
           <input
             type="tel"
             placeholder="Enter Mobile Number"
-            required
           />
 
 
           <label>Email Address</label>
           <input
             type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter Email"
             required
           />
@@ -139,32 +161,35 @@ function Register() {
           />
 
 
-
           <label>Password</label>
 
           <input
             type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             placeholder="Create Password"
             required
           />
-
 
 
           <label>Confirm Password</label>
 
           <input
             type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="Confirm Password"
             required
           />
 
+          {error && <div className="error-message">{error}</div>}
 
-
-          <button 
+          <button
             type="submit"
             className="register-button"
+            disabled={loading}
           >
-            Register
+            {loading ? "Registering…" : "Register"}
           </button>
 
 

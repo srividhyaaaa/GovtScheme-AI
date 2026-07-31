@@ -1,19 +1,13 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 
 function Navbar() {
-
   const navigate = useNavigate();
+  const { isAuthenticated, logout } = useAuth();
 
-
-  const loggedIn = localStorage.getItem("userLoggedIn");
-
-
-  const logout = () => {
-
-    localStorage.removeItem("userLoggedIn");
-
+  const handleLogout = () => {
+    logout();
     navigate("/login");
-
   };
 
 
@@ -41,30 +35,13 @@ function Navbar() {
 
 
 
-        {
-          loggedIn && (
-
-            <>
-
-              <Link to="/dashboard">
-                Dashboard
-              </Link>
-
-
-              <Link to="/chat">
-                AI Assistant
-              </Link>
-
-
-              <Link to="/profile">
-                Profile
-              </Link>
-
-
-            </>
-
-          )
-        }
+        {isAuthenticated && (
+          <>
+            <Link to="/dashboard">Dashboard</Link>
+            <Link to="/chat">AI Assistant</Link>
+            <Link to="/profile">Profile</Link>
+          </>
+        )}
 
 
       </div>
@@ -72,20 +49,11 @@ function Navbar() {
 
 
       <div className="auth-buttons">
-
-
-        {
-          loggedIn ? (
-
-            <button
-              className="logout-btn"
-              onClick={logout}
-            >
-              Logout
-            </button>
-
-
-          ) : (
+        {isAuthenticated ? (
+          <button className="logout-btn" onClick={handleLogout}>
+            Logout
+          </button>
+        ) : (
 
             <>
 

@@ -1,62 +1,72 @@
-import Dashboard from "../pages/Dashboard";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Chat from "../pages/Chat";
-import Navbar from "../components/Navbar";
+import { Routes, Route } from "react-router-dom";
+import PrivateRoute from "./PrivateRoute";
+import AdminRoute from "./AdminRoute";
 
-import Home from "../pages/Home";
-import Login from "../pages/Login";
-import Register from "../pages/Register";
-import Profile from "../pages/Profile";
-import Schemes from "../pages/Schemes";
-import SchemeDetails from "../pages/SchemeDetails";
-import NotFound from "../pages/NotFound";
+import Home from "../pages/public/Home";
+import Login from "../pages/auth/Login";
+import Register from "../pages/auth/Register";
+import Profile from "../pages/student/Profile";
+import Dashboard from "../pages/student/Dashboard";
+import Chat from "../pages/student/Chat";
+import Documents from "../pages/student/Documents";
+import Schemes from "../pages/scholarships/Schemes";
+import SchemeDetails from "../pages/scholarships/SchemeDetails";
+import AdminDashboard from "../pages/admin/AdminDashboard";
+import NotFound from "../pages/public/NotFound";
 
 
 function AppRoutes(){
 
-    return(
-
-        <BrowserRouter>
-
-            <Navbar />
-
-            <Routes>
-
-                <Route path="/" element={<Home />} />
-
-                <Route path="/login" element={<Login />} />
-
-                <Route path="/register" element={<Register />} />
-
-                <Route path="/profile" element={<Profile />} />
-
-                <Route path="/schemes" element={<Schemes />} />
-
-                <Route 
-                    path="/scheme/:id" 
-                    element={<SchemeDetails />} 
-                />
-
-
-                <Route 
-                     path="/dashboard" 
-                     element={<Dashboard />} 
-                />
-                <Route 
-                    path="/chat" 
-                    element={<Chat />} 
-                />
-
-                <Route 
-                    path="*" 
-                    element={<NotFound />} 
-                />
-
-            </Routes>
-
-        </BrowserRouter>
-
-    )
+    return (
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route
+          path="/profile"
+          element={
+            <PrivateRoute>
+              <Profile />
+            </PrivateRoute>
+          }
+        />
+        <Route path="/schemes" element={<Schemes />} />
+        <Route path="/scheme/:id" element={<SchemeDetails />} />
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <Dashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/chat"
+          element={
+            <PrivateRoute>
+              <Chat />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/documents"
+          element={
+            <PrivateRoute>
+              <Documents />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          }
+        />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    );
 
 }
 

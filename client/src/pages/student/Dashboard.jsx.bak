@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import schemes from "../data/schemes";
+import schemes from "../../data/schemes";
 import { Link } from "react-router-dom";
 
 
