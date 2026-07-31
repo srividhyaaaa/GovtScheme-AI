@@ -7,18 +7,18 @@ const protect = require("../middleware/authMiddleware");
 // Validation helper middleware
 const validate = (validations) => {
   return async (req, res, next) => {
-    for (let validation of validations) {
-      const result = await validation.run(req);
-      if (result.errors.length) break;
-    }
+    await Promise.all(validations.map((validation) => validation.run(req)));
 
     const errors = validationResult(req);
     if (errors.isEmpty()) {
       return next();
     }
 
+    const errorMsgs = errors.array().map((e) => e.msg).join(", ");
+
     return res.status(400).json({
       success: false,
+      message: errorMsgs || "Validation error.",
       errors: errors.array(),
     });
   };

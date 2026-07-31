@@ -46,8 +46,13 @@ function Dashboard() {
         studentProfile: loadedProfile,
       };
 
-      const aiResponse = await requestRecommendation(aiPayload);
-      setRecommended(aiResponse.recommendations || []);
+      try {
+        const aiResponse = await requestRecommendation(aiPayload);
+        setRecommended(aiResponse.recommendations || []);
+      } catch (aiError) {
+        console.warn("AI recommendations unavailable", aiError);
+        setRecommended([]);
+      }
 
       const notificationList = [];
 
@@ -180,8 +185,8 @@ function Dashboard() {
           </div>
           <div className="action-list">
             <Link to="/schemes" className="action-pill">Browse schemes</Link>
-            <Link to="/applications" className="action-pill">Track applications</Link>
-            <Link to="/saved" className="action-pill">Saved schemes</Link>
+            <Link to="/my-applications" className="action-pill">Track applications</Link>
+            <Link to="/saved-schemes" className="action-pill">Saved schemes</Link>
             <Link to="/profile" className="action-pill">Update profile</Link>
           </div>
         </section>
@@ -218,13 +223,13 @@ function Dashboard() {
         <div>
           <div className="section-header">
             <h3>Recent applications</h3>
-            <Link to="/applications">View all</Link>
+            <Link to="/my-applications">View all</Link>
           </div>
           <div className="card-grid">
             {applications.length === 0 ? (
               <div className="empty-state-card">
                 <p>No recent applications found.</p>
-                <Link to="/applications">Track an application</Link>
+                <Link to="/my-applications">Track an application</Link>
               </div>
             ) : (
               applications.slice(0, 4).map((application) => (
@@ -244,7 +249,7 @@ function Dashboard() {
         <div>
           <div className="section-header">
             <h3>Saved schemes</h3>
-            <Link to="/saved">View all</Link>
+            <Link to="/saved-schemes">View all</Link>
           </div>
           <div className="card-grid">
             {savedSchemes.length === 0 ? (
@@ -295,7 +300,7 @@ function Dashboard() {
       <div className="dashboard-section">
         <div className="section-header">
           <h3>Recent notifications</h3>
-          <Link to="/applications">View all</Link>
+          <Link to="/my-applications">View all</Link>
         </div>
         <div className="notification-list">
           {notifications.length === 0 ? (

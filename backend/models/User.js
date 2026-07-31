@@ -38,6 +38,9 @@ const userSchema = new mongoose.Schema(
     category: { type: String, default: "" }, // General, OBC, SC, ST, EWS
     state: { type: String, default: "" },
     district: { type: String, default: "" },
+    sportsQuota: { type: Boolean, default: false },
+    parentOccupation: { type: String, default: "" },
+    uploadedDocuments: [{ type: String }],
     specialCategories: {
       disability: { type: Boolean, default: false },
       minority: { type: Boolean, default: false },

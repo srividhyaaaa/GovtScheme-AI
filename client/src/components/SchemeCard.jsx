@@ -1,6 +1,8 @@
 ﻿import { Link } from "react-router-dom";
 
 function SchemeCard({ scheme }) {
+  const applyHref = scheme.applyLink || scheme.apply;
+
   return (
     <div className="scheme-card">
       <div className="scheme-card-header">
@@ -36,14 +38,18 @@ function SchemeCard({ scheme }) {
           View Details
         </Link>
 
-        <a
-          href={scheme.applyLink || scheme.apply}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="apply-btn"
-        >
-          Apply Now
-        </a>
+        {applyHref ? (
+          <a
+            href={applyHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="apply-btn"
+          >
+            Apply Now
+          </a>
+        ) : (
+          <span className="apply-btn disabled">Apply Later</span>
+        )}
       </div>
     </div>
   );

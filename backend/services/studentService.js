@@ -79,6 +79,9 @@ const updateStudentProfile = async (userId, profileData) => {
     "category",
     "state",
     "district",
+    "sportsQuota",
+    "parentOccupation",
+    "uploadedDocuments",
   ];
 
   fields.forEach((field) => {
