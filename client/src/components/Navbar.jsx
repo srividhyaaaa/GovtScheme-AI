@@ -5,6 +5,7 @@ import Modal from "./Modal";
 
 function Navbar() {
   const navigate = useNavigate();
+<<<<<<< HEAD
   const { isAuthenticated, logout } = useAuth();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "light");
@@ -17,6 +18,14 @@ function Navbar() {
   const handleLogout = () => {
     logout();
     setShowLogoutModal(false);
+=======
+  const loggedIn = Boolean(localStorage.getItem("token"));
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("userLoggedIn");
+>>>>>>> 134c790 (updated last 2 prompts)
     navigate("/login");
   };
 

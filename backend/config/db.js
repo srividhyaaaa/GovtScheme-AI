@@ -4,8 +4,9 @@ const connectDB = async () => {
   try {
     const mongoUri = process.env.MONGO_URI;
     if (!mongoUri) {
-      console.error("❌ MONGO_URI is missing from environment variables!");
-      process.exit(1);
+      console.warn("⚠️ MONGO_URI is missing; continuing in fallback auth mode for local development.");
+      global.__govAssistAuthFallbackMode = true;
+      return;
     }
 
     const conn = await mongoose.connect(mongoUri);
@@ -13,7 +14,7 @@ const connectDB = async () => {
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     console.error(`❌ MongoDB Connection Failed: ${error.message}`);
-    process.exit(1);
+    global.__govAssistAuthFallbackMode = true;
   }
 };
 

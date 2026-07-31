@@ -2,6 +2,39 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+const getFallbackUsers = () => {
+  if (!global.__govAssistFallbackUsers) {
+    global.__govAssistFallbackUsers = [];
+  }
+  return global.__govAssistFallbackUsers;
+};
+
+const getUserByEmail = async (email) => {
+  if (!process.env.MONGO_URI) {
+    return getFallbackUsers().find((user) => user.email === email.toLowerCase());
+  }
+
+  return User.findOne({ email: email.toLowerCase() });
+};
+
+const createFallbackUser = async (userData) => {
+  const store = getFallbackUsers();
+  const user = {
+    _id: `fallback-${Date.now()}-${store.length + 1}`,
+    ...userData,
+  };
+  store.push(user);
+  return user;
+};
+
+const getUserById = async (userId) => {
+  if (!process.env.MONGO_URI) {
+    return getFallbackUsers().find((user) => user._id.toString() === userId.toString());
+  }
+
+  return User.findById(userId);
+};
+
 const generateToken = (id, role) => {
   return jwt.sign(
     { id, role },
@@ -15,18 +48,25 @@ const registerUser = async ({ name, email, password, role = "Student" }) => {
     throw new Error("Please provide name, email, and password.");
   }
 
-  const existingUser = await User.findOne({ email: email.toLowerCase() });
+  const existingUser = await getUserByEmail(email);
   if (existingUser) {
     throw new Error("User email already registered.");
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const user = await User.create({
-    name,
-    email: email.toLowerCase(),
-    password: hashedPassword,
-    role: role === "Admin" ? "Admin" : "Student",
-  });
+  const user = process.env.MONGO_URI
+    ? await User.create({
+        name,
+        email: email.toLowerCase(),
+        password: hashedPassword,
+        role: role === "Admin" ? "Admin" : "Student",
+      })
+    : await createFallbackUser({
+        name,
+        email: email.toLowerCase(),
+        password: hashedPassword,
+        role: role === "Admin" ? "Admin" : "Student",
+      });
 
   const token = generateToken(user._id, user.role);
 
@@ -46,7 +86,7 @@ const loginUser = async ({ email, password }) => {
     throw new Error("Please provide email and password.");
   }
 
-  const user = await User.findOne({ email: email.toLowerCase() });
+  const user = await getUserByEmail(email);
   if (!user) {
     throw new Error("Invalid credentials.");
   }
@@ -72,11 +112,17 @@ const loginUser = async ({ email, password }) => {
 };
 
 const getUserProfile = async (userId) => {
-  const user = await User.findById(userId).select("-password").populate("savedScholarships");
+  const user = await getUserById(userId);
   if (!user) {
     throw new Error("User not found.");
   }
-  return user;
+
+  if (!process.env.MONGO_URI) {
+    const { password, ...safeUser } = user;
+    return safeUser;
+  }
+
+  return user.select("-password").populate("savedScholarships");
 };
 
 module.exports = {

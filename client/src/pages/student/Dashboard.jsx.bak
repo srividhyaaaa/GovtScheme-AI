@@ -1,16 +1,35 @@
 import { useEffect, useState } from "react";
+<<<<<<< HEAD:client/src/pages/student/Dashboard.jsx.bak
 import schemes from "../../data/schemes";
 import { Link } from "react-router-dom";
+=======
+import schemes from "../data/schemes";
+import { Link, useNavigate } from "react-router-dom";
+import api from "../api/client";
+>>>>>>> 134c790 (updated last 2 prompts):client/src/pages/Dashboard.jsx
 
 
 function Dashboard(){
 
     const [recommended,setRecommended] = useState([]);
+    const navigate = useNavigate();
 
 
 
     useEffect(()=>{
+        const token = localStorage.getItem("token");
+        if (!token) {
+            navigate("/login");
+            return;
+        }
 
+        api.get("/auth/me")
+            .catch(() => {
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+                localStorage.removeItem("userLoggedIn");
+                navigate("/login");
+            });
 
         const profile =
         JSON.parse(
@@ -210,7 +229,7 @@ function Dashboard(){
         );
 
 
-    },[]);
+    },[navigate]);
 
 
 
@@ -237,26 +256,19 @@ function Dashboard(){
 
 
 
-            {
-                recommended.length===0 ?
-
-                (
-
-                    <div className="empty-dashboard">
-
-                        <h2>
-                            No matching schemes found
-                        </h2>
-
-                        <Link to="/profile">
-                            Update Profile
-                        </Link>
-
-                    </div>
-
-                )
-
-                :
+            {loading ? (
+                <Loader label="Generating recommendations..." />
+            ) : error ? (
+                <div className="empty-dashboard">
+                    <h2>{error}</h2>
+                    <Link to="/profile">Update Profile</Link>
+                </div>
+            ) : recommended.length===0 ? (
+                <div className="empty-dashboard">
+                    <h2>No matching schemes found</h2>
+                    <Link to="/profile">Update Profile</Link>
+                </div>
+            ) : (
 
                 (
 
@@ -269,20 +281,20 @@ function Dashboard(){
 
                     <div
                     className="recommendation-card"
-                    key={scheme.id}
+                    key={scheme.scholarshipId || scheme.id}
                     >
 
 
 
                         <h2>
-                            {scheme.name}
+                            {scheme.title || scheme.name}
                         </h2>
 
 
 
                         <span className="match-score">
 
-                            {scheme.match}% Match
+                            {scheme.matchScore || scheme.match}% Match
 
                         </span>
 
@@ -297,8 +309,7 @@ function Dashboard(){
 
                         <ul>
 
-                        {
-                            scheme.reasons.map(
+                        {(scheme.reasons || []).map(
                                 (reason,index)=>(
 
                                 <li key={index}>
@@ -307,8 +318,7 @@ function Dashboard(){
 
                                 )
 
-                            )
-                        }
+                            )}
 
                         </ul>
 
@@ -323,7 +333,7 @@ function Dashboard(){
 
                             <br/>
 
-                            {scheme.benefits}
+                            {scheme.aiSummary || scheme.summary || scheme.benefits || "This scheme looks promising for your profile."}
 
                         </p>
 
@@ -332,7 +342,7 @@ function Dashboard(){
 
                         <Link
                         className="view-btn"
-                        to={`/scheme/${scheme.id}`}
+                        to={`/scheme/${scheme.scholarshipId || scheme.id}`}
                         >
 
                             View Details
@@ -352,6 +362,7 @@ function Dashboard(){
                 </div>
 
                 )
+            )}
 
             }
 

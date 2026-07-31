@@ -1,4 +1,5 @@
 const Scholarship = require("../models/Scholarship");
+const { getFallbackScholarships, getFallbackScholarshipById } = require("./fallbackData");
 
 const parseNumber = (value, fallback = null) => {
   const number = Number(value);
@@ -166,6 +167,27 @@ const getAllScholarships = async (queryParams = {}) => {
   const { pageNum, limitNum, skip } = parsePagination(queryParams);
   const sort = buildSort(queryParams, false);
 
+  if (!process.env.MONGO_URI) {
+    const items = getFallbackScholarships().filter((item) => {
+      if (!filter) return true;
+      if (filter.category && !new RegExp(filter.category.$regex, filter.category.$options).test(item.category || "")) return false;
+      if (filter.state && !new RegExp(filter.state.$regex, filter.state.$options).test(item.state || "")) return false;
+      if (filter.course && !new RegExp(filter.course.$regex, filter.course.$options).test(item.course || "")) return false;
+      if (filter.gender && !new RegExp(filter.gender.$regex, filter.gender.$options).test(item.gender || "")) return false;
+      if (filter.provider && !new RegExp(filter.provider.$regex, filter.provider.$options).test(item.provider || "")) return false;
+      if (filter.title && !new RegExp(filter.title.$regex, filter.title.$options).test(item.title || "")) return false;
+      return true;
+    });
+
+    const paged = items.slice(skip, skip + limitNum);
+    return {
+      scholarships: paged,
+      total: items.length,
+      page: pageNum,
+      pages: Math.max(1, Math.ceil(items.length / limitNum)),
+    };
+  }
+
   const scholarships = await Scholarship.find(filter)
     .sort(sort)
     .skip(skip)
@@ -182,6 +204,14 @@ const getAllScholarships = async (queryParams = {}) => {
 };
 
 const getScholarshipById = async (id) => {
+  if (!process.env.MONGO_URI) {
+    const scholarship = getFallbackScholarshipById(id);
+    if (!scholarship) {
+      throw new Error("Scholarship not found");
+    }
+    return scholarship;
+  }
+
   const scholarship = await Scholarship.findById(id);
   if (!scholarship) {
     throw new Error("Scholarship not found");
@@ -192,6 +222,21 @@ const getScholarshipById = async (id) => {
 const searchScholarships = async (searchTerm, queryParams = {}) => {
   if (!searchTerm || searchTerm.trim() === "") {
     return getAllScholarships(queryParams);
+  }
+
+  if (!process.env.MONGO_URI) {
+    const items = getFallbackScholarships().filter((item) => {
+      const text = `${item.title || ""} ${item.provider || ""} ${item.description || ""}`.toLowerCase();
+      return text.includes(searchTerm.trim().toLowerCase());
+    });
+    const { pageNum, limitNum, skip } = parsePagination(queryParams);
+    const paged = items.slice(skip, skip + limitNum);
+    return {
+      scholarships: paged,
+      total: items.length,
+      page: pageNum,
+      pages: Math.max(1, Math.ceil(items.length / limitNum)),
+    };
   }
 
   const filter = buildFilter(queryParams);

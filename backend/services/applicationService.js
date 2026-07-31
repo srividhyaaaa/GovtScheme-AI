@@ -1,11 +1,28 @@
 const Application = require("../models/Application");
 const Scholarship = require("../models/Scholarship");
+const { getFallbackScholarshipById } = require("./fallbackData");
 
 const createApplication = async (studentId, applicationData) => {
   const { scholarship, status, remarks, applicationDate } = applicationData;
 
   if (!scholarship) {
     throw new Error("Scholarship ID is required.");
+  }
+
+  if (!process.env.MONGO_URI) {
+    const existingScholarship = getFallbackScholarshipById(scholarship);
+    if (!existingScholarship) {
+      throw new Error("Scholarship not found.");
+    }
+    return {
+      _id: `app-${Date.now()}`,
+      student: studentId,
+      scholarship: existingScholarship._id,
+      status: status || "Applied",
+      remarks: remarks || "",
+      applicationDate: applicationDate || new Date(),
+      scholarship: existingScholarship,
+    };
   }
 
   // Check if scholarship exists
@@ -39,6 +56,10 @@ const createApplication = async (studentId, applicationData) => {
 };
 
 const getStudentApplications = async (studentId) => {
+  if (!process.env.MONGO_URI) {
+    return [];
+  }
+
   const applications = await Application.find({ student: studentId })
     .populate("scholarship")
     .sort({ createdAt: -1 });
@@ -47,6 +68,10 @@ const getStudentApplications = async (studentId) => {
 };
 
 const getApplicationById = async (studentId, applicationId) => {
+  if (!process.env.MONGO_URI) {
+    return null;
+  }
+
   const application = await Application.findOne({
     _id: applicationId,
     student: studentId,
@@ -60,6 +85,10 @@ const getApplicationById = async (studentId, applicationId) => {
 };
 
 const updateApplication = async (studentId, applicationId, updateData) => {
+  if (!process.env.MONGO_URI) {
+    return null;
+  }
+
   const application = await Application.findOne({
     _id: applicationId,
     student: studentId,
@@ -78,6 +107,10 @@ const updateApplication = async (studentId, applicationId, updateData) => {
 };
 
 const deleteApplication = async (studentId, applicationId) => {
+  if (!process.env.MONGO_URI) {
+    return true;
+  }
+
   const application = await Application.findOneAndDelete({
     _id: applicationId,
     student: studentId,

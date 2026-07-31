@@ -1,6 +1,14 @@
+<<<<<<< HEAD
 import { Routes, Route } from "react-router-dom";
 import PrivateRoute from "./PrivateRoute";
 import AdminRoute from "./AdminRoute";
+=======
+import Dashboard from "../pages/Dashboard";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Chat from "../pages/Chat";
+import Navbar from "../components/Navbar";
+import ProtectedRoute from "../components/ProtectedRoute";
+>>>>>>> 134c790 (updated last 2 prompts)
 
 import Home from "../pages/public/Home";
 import Login from "../pages/auth/Login";
@@ -23,6 +31,7 @@ import NotFound from "../pages/public/NotFound";
 
 function AppRoutes(){
 
+<<<<<<< HEAD
     return (
       <Routes>
         <Route path="/" element={<Home />} />
@@ -93,6 +102,51 @@ function AppRoutes(){
         <Route path="*" element={<NotFound />} />
       </Routes>
     );
+=======
+    return(
+
+        <BrowserRouter>
+
+            <Navbar />
+
+            <Routes>
+
+                <Route path="/" element={<Home />} />
+
+                <Route path="/login" element={<Login />} />
+
+                <Route path="/register" element={<Register />} />
+
+                <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+
+                <Route path="/schemes" element={<Schemes />} />
+
+                <Route 
+                    path="/scheme/:id" 
+                    element={<SchemeDetails />} 
+                />
+
+
+                <Route 
+                     path="/dashboard" 
+                     element={<ProtectedRoute><Dashboard /></ProtectedRoute>} 
+                />
+                <Route 
+                    path="/chat" 
+                    element={<ProtectedRoute><Chat /></ProtectedRoute>} 
+                />
+
+                <Route 
+                    path="*" 
+                    element={<NotFound />} 
+                />
+
+            </Routes>
+
+        </BrowserRouter>
+
+    )
+>>>>>>> 134c790 (updated last 2 prompts)
 
 }
 
