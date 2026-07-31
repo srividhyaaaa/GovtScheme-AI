@@ -32,7 +32,7 @@ function SchemeCard({ scheme }) {
       </div>
 
       <div className="scheme-actions">
-        <Link to={`/scheme/${scheme._id || scheme.id}`} className="details-btn">
+        <Link to={`/scholarship/${scheme._id || scheme.id}`} className="details-btn">
           View Details
         </Link>
 

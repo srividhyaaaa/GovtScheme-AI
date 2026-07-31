@@ -5,6 +5,7 @@ const { adminOnly } = require("../middleware/adminMiddleware");
 const {
   getDashboardStats,
   getAllUsers,
+  updateUserRole,
   getAllApplications,
   updateApplicationStatus,
   getTopScholarships,
@@ -41,6 +42,7 @@ router.get("/recent-activities", getRecentActivities);
 
 // Manage Users
 router.get("/users", getAllUsers);
+router.put("/users/:id/role", updateUserRole);
 
 // Manage System Applications
 router.get("/applications", getAllApplications);

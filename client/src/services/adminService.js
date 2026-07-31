@@ -55,6 +55,11 @@ export const fetchAllUsers = async () => {
   return response.data;
 };
 
+export const updateUserRole = async (id, role) => {
+  const response = await apiClient.put(`/admin/users/${id}/role`, { role });
+  return response.data;
+};
+
 export const fetchAllApplications = async () => {
   const response = await apiClient.get("/admin/applications");
   return response.data;

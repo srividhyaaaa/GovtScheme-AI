@@ -3,10 +3,12 @@ import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { register as registerRequest } from "../../services/authService";
 import { getDefaultRedirect } from "../../utils/authUtils";
+import { useToast } from "../../contexts/ToastContext";
 
 function Register() {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { addToast } = useToast();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,9 +31,11 @@ function Register() {
       const response = await registerRequest({ name, email, password });
       login(response.token, response.user);
       const redirectPath = getDefaultRedirect(response.user);
+      addToast({ title: "Account ready", message: "Your profile is set up and you can start exploring schemes.", type: "success" });
       navigate(redirectPath, { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || "Unable to register. Please try again.");
+      addToast({ title: "Registration failed", message: err.response?.data?.message || "Please try again in a moment.", type: "error" });
     } finally {
       setLoading(false);
     }
@@ -41,173 +45,83 @@ function Register() {
   return (
     <div className="register-page">
 
-      <div className="register-card">
+      <div className="auth-card">
+        <div className="auth-card__header">
+          <div className="brand-mark">🇮🇳</div>
+          <div>
+            <h1>GovAssist AI</h1>
+            <p>Create your account to discover scholarships tailored to your profile.</p>
+          </div>
+        </div>
 
-        <h1>🇮🇳 GovAssist AI</h1>
+        <form onSubmit={handleRegister} className="auth-form auth-form--stacked">
+          <div className="field-group">
+            <label htmlFor="register-name">Full name</label>
+            <input id="register-name" type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter full name" required />
+          </div>
 
-        <h2>Create Your Account</h2>
+          <div className="field-row">
+            <div className="field-group">
+              <label htmlFor="register-email">Email address</label>
+              <input id="register-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter email" required />
+            </div>
+            <div className="field-group">
+              <label htmlFor="register-mobile">Mobile number</label>
+              <input id="register-mobile" type="tel" placeholder="Enter mobile number" />
+            </div>
+          </div>
 
-        <p>
-          Register to access personalized government schemes and AI assistance.
-        </p>
+          <div className="field-row">
+            <div className="field-group">
+              <label htmlFor="register-state">State</label>
+              <select id="register-state" required>
+                <option value="">Select state</option>
+                <option>Andhra Pradesh</option>
+                <option>Telangana</option>
+                <option>Karnataka</option>
+                <option>Tamil Nadu</option>
+                <option>Maharashtra</option>
+              </select>
+            </div>
+            <div className="field-group">
+              <label htmlFor="register-occupation">Occupation</label>
+              <select id="register-occupation" required>
+                <option value="">Select occupation</option>
+                <option>Student</option>
+                <option>Farmer</option>
+                <option>Employee</option>
+                <option>Business</option>
+                <option>Self Employed</option>
+              </select>
+            </div>
+          </div>
 
+          <div className="field-group">
+            <label htmlFor="register-income">Annual income</label>
+            <input id="register-income" type="number" placeholder="Enter annual income" required />
+          </div>
 
-        <form onSubmit={handleRegister}>
+          <div className="field-row">
+            <div className="field-group">
+              <label htmlFor="register-password">Password</label>
+              <input id="register-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Create password" required />
+            </div>
+            <div className="field-group">
+              <label htmlFor="register-confirm">Confirm password</label>
+              <input id="register-confirm" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm password" required />
+            </div>
+          </div>
 
+          {error ? <div className="error-message">{error}</div> : null}
 
-          <label>Full Name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Enter Full Name"
-            required
-          />
-
-
-          <label>Aadhaar Number</label>
-          <input
-            type="text"
-            placeholder="XXXX XXXX XXXX"
-          />
-
-
-          <label>Mobile Number</label>
-          <input
-            type="tel"
-            placeholder="Enter Mobile Number"
-          />
-
-
-          <label>Email Address</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter Email"
-            required
-          />
-
-
-          <label>State</label>
-
-          <select required>
-            <option value="">
-              Select State
-            </option>
-
-            <option>
-              Andhra Pradesh
-            </option>
-
-            <option>
-              Telangana
-            </option>
-
-            <option>
-              Karnataka
-            </option>
-
-            <option>
-              Tamil Nadu
-            </option>
-
-            <option>
-              Maharashtra
-            </option>
-
-          </select>
-
-
-
-          <label>Occupation</label>
-
-          <select required>
-
-            <option value="">
-              Select Occupation
-            </option>
-
-            <option>
-              Student
-            </option>
-
-            <option>
-              Farmer
-            </option>
-
-            <option>
-              Employee
-            </option>
-
-            <option>
-              Business
-            </option>
-
-            <option>
-              Self Employed
-            </option>
-
-          </select>
-
-
-
-          <label>Annual Income</label>
-
-          <input
-            type="number"
-            placeholder="Enter Annual Income"
-            required
-          />
-
-
-          <label>Password</label>
-
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Create Password"
-            required
-          />
-
-
-          <label>Confirm Password</label>
-
-          <input
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="Confirm Password"
-            required
-          />
-
-          {error && <div className="error-message">{error}</div>}
-
-          <button
-            type="submit"
-            className="register-button"
-            disabled={loading}
-          >
-            {loading ? "Registering…" : "Register"}
+          <button type="submit" className="primary-button auth-submit" disabled={loading}>
+            {loading ? "Creating account…" : "Create account"}
           </button>
-
-
         </form>
 
-
-
-        <p className="login-link">
-
-          Already have an account?{" "}
-
-          <Link to="/login">
-            Login
-          </Link>
-
+        <p className="auth-link">
+          Already have an account? <Link to="/login">Login</Link>
         </p>
-
-
       </div>
 
     </div>

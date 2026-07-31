@@ -48,7 +48,7 @@ const getDashboardStats = async (req, res, next) => {
 // @access  Private / Admin
 const getAllUsers = async (req, res, next) => {
   try {
-    const users = await User.find({ role: "Student" })
+    const users = await User.find({ role: { $in: ["Student", "Admin"] } })
       .select("-password")
       .sort({ createdAt: -1 });
 
@@ -59,6 +59,39 @@ const getAllUsers = async (req, res, next) => {
     });
   } catch (error) {
     res.status(500);
+    next(error);
+  }
+};
+
+const updateUserRole = async (req, res, next) => {
+  try {
+    const { role } = req.body;
+
+    if (!role || !["Student", "Admin"].includes(role)) {
+      return res.status(400).json({
+        success: false,
+        message: "A valid role is required.",
+      });
+    }
+
+    const user = await User.findById(req.params.id).select("-password");
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    user.role = role;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "User role updated successfully.",
+      user,
+    });
+  } catch (error) {
+    res.status(400);
     next(error);
   }
 };
@@ -350,6 +383,7 @@ const getDashboardSummary = async (req, res) => {
 module.exports = {
   getDashboardStats,
   getAllUsers,
+  updateUserRole,
   getAllApplications,
   updateApplicationStatus,
   getTopScholarships,

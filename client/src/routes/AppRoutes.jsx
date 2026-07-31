@@ -9,8 +9,14 @@ import Profile from "../pages/student/Profile";
 import Dashboard from "../pages/student/Dashboard";
 import Chat from "../pages/student/Chat";
 import Documents from "../pages/student/Documents";
+import MyApplications from "../pages/student/MyApplications";
+import SavedSchemes from "../pages/student/SavedSchemes";
+import AIRecommendations from "../pages/AIRecommendations";
+import CompareSchemes from "../pages/CompareSchemes";
+import Roadmap from "../pages/Roadmap";
 import Schemes from "../pages/scholarships/Schemes";
 import SchemeDetails from "../pages/scholarships/SchemeDetails";
+import ScholarshipDetails from "../pages/ScholarshipDetails";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import NotFound from "../pages/public/NotFound";
 
@@ -31,7 +37,11 @@ function AppRoutes(){
           }
         />
         <Route path="/schemes" element={<Schemes />} />
+        <Route path="/recommendations" element={<AIRecommendations />} />
+        <Route path="/compare" element={<CompareSchemes />} />
+        <Route path="/roadmap" element={<Roadmap />} />
         <Route path="/scheme/:id" element={<SchemeDetails />} />
+        <Route path="/scholarship/:id" element={<ScholarshipDetails />} />
         <Route
           path="/dashboard"
           element={
@@ -53,6 +63,22 @@ function AppRoutes(){
           element={
             <PrivateRoute>
               <Documents />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/my-applications"
+          element={
+            <PrivateRoute>
+              <MyApplications />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/saved-schemes"
+          element={
+            <PrivateRoute>
+              <SavedSchemes />
             </PrivateRoute>
           }
         />

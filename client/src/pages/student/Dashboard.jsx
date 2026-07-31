@@ -5,6 +5,8 @@ import { fetchApplications } from "../../services/applicationService";
 import { fetchSavedScholarships } from "../../services/savedService";
 import { fetchScholarships } from "../../services/scholarshipService";
 import { requestRecommendation } from "../../services/aiService";
+import PageSkeleton from "../../components/PageSkeleton";
+import { useToast } from "../../contexts/ToastContext";
 
 function Dashboard() {
   const [profile, setProfile] = useState(null);
@@ -15,6 +17,7 @@ function Dashboard() {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { addToast } = useToast();
 
   const fetchDashboardData = async () => {
     setLoading(true);
@@ -75,7 +78,9 @@ function Dashboard() {
       setNotifications(notificationList);
     } catch (fetchError) {
       console.error("Dashboard load failed", fetchError);
-      setError(fetchError.response?.data?.message || "Unable to load dashboard data.");
+      const message = fetchError.response?.data?.message || "Unable to load dashboard data.";
+      setError(message);
+      addToast({ title: "Dashboard unavailable", message, type: "error" });
     } finally {
       setLoading(false);
     }
@@ -117,9 +122,10 @@ function Dashboard() {
     return (
       <div className="dashboard-page">
         <div className="dashboard-header">
-          <h1>Loading dashboard</h1>
-          <p>Please wait while we gather your latest student recommendations.</p>
+          <h1>Student dashboard</h1>
+          <p>Gathering your profile, schemes, and recommendations.</p>
         </div>
+        <PageSkeleton rows={4} />
       </div>
     );
   }
@@ -127,11 +133,15 @@ function Dashboard() {
   return (
     <div className="dashboard-page">
       <div className="dashboard-header">
-        <h1>Student Dashboard</h1>
-        <p>Live insights from your profile, applications, saved schemes, and AI recommendations.</p>
+        <div>
+          <p className="eyebrow">Student dashboard</p>
+          <h1>Welcome back, {profile?.name || "student"}</h1>
+          <p>Live insights from your profile, applications, saved schemes, and AI recommendations.</p>
+        </div>
+        <Link to="/profile" className="secondary-button">Edit profile</Link>
       </div>
 
-      {error && <div className="dashboard-error">{error}</div>}
+      {error ? <div className="dashboard-error">{error}</div> : null}
 
       <div className="dashboard-grid">
         <section className="dashboard-card welcome-card">
