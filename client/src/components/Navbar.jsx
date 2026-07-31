@@ -27,7 +27,7 @@ function Navbar() {
     <>
       <nav className="navbar">
         <Link className="brand" to="/">
-          <span className="brand-mark">⚡</span>
+          <img src="/logo.png" alt="GovAssist AI Logo" className="brand-logo" />
           <span>GovAssist AI</span>
         </Link>
 
