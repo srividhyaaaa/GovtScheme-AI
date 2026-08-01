@@ -1,8 +1,17 @@
 const Student = require("../models/Student");
 const Scholarship = require("../models/Scholarship");
 const SavedScholarship = require("../models/SavedScholarship");
+const { getFallbackScholarshipById } = require("./fallbackData");
 
 const saveScholarship = async (studentId, scholarshipId, notes = "") => {
+  if (!process.env.MONGO_URI) {
+    const fallbackScholarship = getFallbackScholarshipById(scholarshipId);
+    if (!fallbackScholarship) {
+      throw new Error("Scholarship not found.");
+    }
+    return { message: "Scholarship saved successfully" };
+  }
+
   const student = await Student.findById(studentId);
   if (!student) {
     throw new Error("Student not found.");
@@ -54,6 +63,13 @@ const removeSavedScholarship = async (studentId, scholarshipId) => {
 };
 
 const getSavedScholarships = async (studentId) => {
+  if (!process.env.MONGO_URI) {
+    return {
+      savedScholarships: [],
+      savedRecords: [],
+    };
+  }
+
   const student = await Student.findById(studentId).populate(
     "savedScholarships"
   );

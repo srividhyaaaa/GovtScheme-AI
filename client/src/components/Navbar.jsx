@@ -20,42 +20,69 @@ function Navbar() {
     navigate("/login");
   };
 
-  const linkClass = ({ isActive }) => (isActive ? "nav-link active" : "nav-link");
+  const linkClass = ({ isActive }) =>
+    isActive ? "nav-link active" : "nav-link";
 
   return (
     <>
       <nav className="navbar">
         <Link className="brand" to="/">
-          <span className="brand-mark">⚡</span>
+          <img src="/logo.png" alt="GovAssist AI Logo" className="brand-logo" />
           <span>GovAssist AI</span>
         </Link>
 
         <div className="nav-links">
           <NavLink className={linkClass} to="/">Home</NavLink>
           <NavLink className={linkClass} to="/schemes">Schemes</NavLink>
+
           {isAuthenticated && (
             <>
-              <NavLink className={linkClass} to="/dashboard">Dashboard</NavLink>
-              <NavLink className={linkClass} to="/chat">AI Assistant</NavLink>
-              <NavLink className={linkClass} to="/compare">Compare</NavLink>
-              <NavLink className={linkClass} to="/roadmap">Roadmap</NavLink>
-              <NavLink className={linkClass} to="/profile">Profile</NavLink>
+              <NavLink className={linkClass} to="/dashboard">
+                Dashboard
+              </NavLink>
+              <NavLink className={linkClass} to="/chat">
+                AI Assistant
+              </NavLink>
+              <NavLink className={linkClass} to="/compare">
+                Compare
+              </NavLink>
+              <NavLink className={linkClass} to="/roadmap">
+                Roadmap
+              </NavLink>
+              <NavLink className={linkClass} to="/profile">
+                Profile
+              </NavLink>
             </>
           )}
         </div>
 
         <div className="auth-buttons">
-          <button className="theme-toggle" type="button" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} aria-label="Toggle theme">
+          <button
+            className="theme-toggle"
+            type="button"
+            onClick={() =>
+              setTheme(theme === "dark" ? "light" : "dark")
+            }
+            aria-label="Toggle theme"
+          >
             {theme === "dark" ? "☀" : "☾"}
           </button>
+
           {isAuthenticated ? (
-            <button className="logout-btn" onClick={() => setShowLogoutModal(true)}>
+            <button
+              className="logout-btn"
+              onClick={() => setShowLogoutModal(true)}
+            >
               Logout
             </button>
           ) : (
             <>
-              <Link className="login-btn" to="/login">Login</Link>
-              <Link className="register-btn" to="/register">Register</Link>
+              <Link className="login-btn" to="/login">
+                Login
+              </Link>
+              <Link className="register-btn" to="/register">
+                Register
+              </Link>
             </>
           )}
         </div>
@@ -65,12 +92,25 @@ function Navbar() {
         open={showLogoutModal}
         title="Confirm logout"
         onClose={() => setShowLogoutModal(false)}
-        actions={(
+        actions={
           <>
-            <button type="button" className="secondary-button" onClick={() => setShowLogoutModal(false)}>Cancel</button>
-            <button type="button" className="primary-button" onClick={handleLogout}>Confirm logout</button>
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() => setShowLogoutModal(false)}
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              className="primary-button"
+              onClick={handleLogout}
+            >
+              Confirm logout
+            </button>
           </>
-        )}
+        }
       >
         <p>Are you sure you want to sign out of GovAssist AI?</p>
       </Modal>

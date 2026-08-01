@@ -1,8 +1,8 @@
-function Loader() {
+function Loader({ label = "Loading..." }) {
   return (
-    <div className="loader-container">
+    <div className="loader-state" role="status" aria-live="polite">
       <div className="loader-spinner" />
-      <span>Loading...</span>
+      <p>{label}</p>
     </div>
   );
 }

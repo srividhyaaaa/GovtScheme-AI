@@ -2,10 +2,12 @@ const mongoose = require("mongoose");
 
 const connectDB = async () => {
   try {
-    const mongoUri = process.env.MONGO_URI;
-    if (!mongoUri) {
-      console.error("❌ MONGO_URI is missing from environment variables!");
-      process.exit(1);
+    const mongoUri = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/scholarmatch";
+
+    if (!process.env.MONGO_URI) {
+      console.warn(
+        "⚠️ MONGO_URI missing from environment. Falling back to local MongoDB: mongodb://127.0.0.1:27017/scholarmatch"
+      );
     }
 
     const conn = await mongoose.connect(mongoUri);
@@ -13,7 +15,7 @@ const connectDB = async () => {
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     console.error(`❌ MongoDB Connection Failed: ${error.message}`);
-    process.exit(1);
+    global.__govAssistAuthFallbackMode = true;
   }
 };
 

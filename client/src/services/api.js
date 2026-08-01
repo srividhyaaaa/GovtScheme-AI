@@ -1,10 +1,3 @@
-import axios from "axios";
+import apiClient from "./apiClient";
 
-const api = axios.create({
-  baseURL: "/api",
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-export default api;
+export default apiClient;

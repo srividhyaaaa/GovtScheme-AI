@@ -4,6 +4,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { register as registerRequest } from "../../services/authService";
 import { getDefaultRedirect } from "../../utils/authUtils";
 import { useToast } from "../../contexts/ToastContext";
+import { getErrorMessage } from "../../utils/errorUtils";
 
 function Register() {
   const navigate = useNavigate();
@@ -11,6 +12,10 @@ function Register() {
   const { addToast } = useToast();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [state, setState] = useState("");
+  const [parentOccupation, setParentOccupation] = useState("");
+  const [familyIncome, setFamilyIncome] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState(null);
@@ -28,14 +33,23 @@ function Register() {
     setLoading(true);
 
     try {
-      const response = await registerRequest({ name, email, password });
+      const response = await registerRequest({
+        name,
+        email,
+        password,
+        phone,
+        state,
+        parentOccupation,
+        familyIncome,
+      });
       login(response.token, response.user);
       const redirectPath = getDefaultRedirect(response.user);
       addToast({ title: "Account ready", message: "Your profile is set up and you can start exploring schemes.", type: "success" });
       navigate(redirectPath, { replace: true });
     } catch (err) {
-      setError(err.response?.data?.message || "Unable to register. Please try again.");
-      addToast({ title: "Registration failed", message: err.response?.data?.message || "Please try again in a moment.", type: "error" });
+      const errorMessage = getErrorMessage(err, "Unable to register. Please try again.");
+      setError(errorMessage);
+      addToast({ title: "Registration failed", message: errorMessage, type: "error" });
     } finally {
       setLoading(false);
     }
@@ -67,14 +81,14 @@ function Register() {
             </div>
             <div className="field-group">
               <label htmlFor="register-mobile">Mobile number</label>
-              <input id="register-mobile" type="tel" placeholder="Enter mobile number" />
+              <input id="register-mobile" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Enter mobile number" />
             </div>
           </div>
 
           <div className="field-row">
             <div className="field-group">
               <label htmlFor="register-state">State</label>
-              <select id="register-state" required>
+              <select id="register-state" value={state} onChange={(e) => setState(e.target.value)}>
                 <option value="">Select state</option>
                 <option>Andhra Pradesh</option>
                 <option>Telangana</option>
@@ -85,7 +99,7 @@ function Register() {
             </div>
             <div className="field-group">
               <label htmlFor="register-occupation">Occupation</label>
-              <select id="register-occupation" required>
+              <select id="register-occupation" value={parentOccupation} onChange={(e) => setParentOccupation(e.target.value)}>
                 <option value="">Select occupation</option>
                 <option>Student</option>
                 <option>Farmer</option>
@@ -98,7 +112,7 @@ function Register() {
 
           <div className="field-group">
             <label htmlFor="register-income">Annual income</label>
-            <input id="register-income" type="number" placeholder="Enter annual income" required />
+            <input id="register-income" type="number" value={familyIncome} onChange={(e) => setFamilyIncome(e.target.value)} placeholder="Enter annual income" />
           </div>
 
           <div className="field-row">

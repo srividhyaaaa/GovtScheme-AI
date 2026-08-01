@@ -200,8 +200,8 @@ function Profile() {
     <div className="profile-page">
       <div className="profile-card">
         <div className="profile-header">
-          <h1>👤 Complete Your Profile</h1>
-          <p>Help AI find schemes suitable for you</p>
+          <h1>👤 Your Profile</h1>
+          <p>Update your details to improve recommendations and keep your application history accurate.</p>
         </div>
 
         <ProgressBar value={calculateCompletion} />

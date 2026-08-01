@@ -4,6 +4,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { login as loginRequest } from "../../services/authService";
 import { getDefaultRedirect } from "../../utils/authUtils";
 import { useToast } from "../../contexts/ToastContext";
+import { getErrorMessage } from "../../utils/errorUtils";
 
 function Login() {
   const navigate = useNavigate();
@@ -30,8 +31,9 @@ function Login() {
       addToast({ title: "Welcome back", message: "You are signed in and ready to explore schemes.", type: "success" });
       navigate(redirectPath, { replace: true });
     } catch (err) {
-      setError(err.response?.data?.message || "Unable to login. Please try again.");
-      addToast({ title: "Login failed", message: err.response?.data?.message || "Please check your credentials and try again.", type: "error" });
+      const errorMessage = getErrorMessage(err, "Unable to login. Please try again.");
+      setError(errorMessage);
+      addToast({ title: "Login failed", message: errorMessage, type: "error" });
     } finally {
       setLoading(false);
     }

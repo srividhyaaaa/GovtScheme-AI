@@ -166,20 +166,19 @@ html[data-theme="dark"] .navbar {
   display:flex;
   align-items:center;
   gap:10px;
+  height:45px;
   font-weight:700;
   color:var(--color-primary);
   text-decoration:none;
   font-size:1.05rem;
 }
 
-.brand-mark {
-  display:grid;
-  place-items:center;
+.brand-logo {
   width:38px;
   height:38px;
+  object-fit:contain;
   border-radius:50%;
-  background:linear-gradient(135deg, var(--color-primary), var(--color-accent));
-  color:white;
+  flex-shrink:0;
 }
 
 .nav-links,
