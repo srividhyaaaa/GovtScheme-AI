@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose");
 
 const getFallbackUsers = () => {
   if (!global.__govAssistFallbackUsers) {
@@ -10,11 +11,13 @@ const getFallbackUsers = () => {
 };
 
 const getUserByEmail = async (email) => {
-  if (!process.env.MONGO_URI) {
-    return getFallbackUsers().find((user) => user.email === email.toLowerCase());
+  const normalizedEmail = (email || "").toLowerCase();
+
+  if (!process.env.MONGO_URI && mongoose.connection.readyState !== 1) {
+    return getFallbackUsers().find((user) => user.email === normalizedEmail);
   }
 
-  return User.findOne({ email: email.toLowerCase() });
+  return User.findOne({ email: normalizedEmail });
 };
 
 const createFallbackUser = async (userData) => {
@@ -28,7 +31,7 @@ const createFallbackUser = async (userData) => {
 };
 
 const getUserById = async (userId) => {
-  if (!process.env.MONGO_URI) {
+  if (!process.env.MONGO_URI && mongoose.connection.readyState !== 1) {
     return getFallbackUsers().find((user) => user._id.toString() === userId.toString());
   }
 
@@ -57,38 +60,44 @@ const registerUser = async ({
     throw new Error("Please provide name, email, and password.");
   }
 
-  const existingUser = await getUserByEmail(email);
+  const normalizedName = String(name).trim();
+  const normalizedEmail = String(email).trim().toLowerCase();
+
+  if (!normalizedName || !normalizedEmail || !String(password)) {
+    throw new Error("Please provide name, email, and password.");
+  }
+
+  const existingUser = await getUserByEmail(normalizedEmail);
   if (existingUser) {
     throw new Error("User email already registered.");
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-<<<<<<< HEAD
-  const user = process.env.MONGO_URI
-    ? await User.create({
-        name,
-        email: email.toLowerCase(),
-        password: hashedPassword,
-        role: role === "Admin" ? "Admin" : "Student",
-      })
-    : await createFallbackUser({
-        name,
-        email: email.toLowerCase(),
-        password: hashedPassword,
-        role: role === "Admin" ? "Admin" : "Student",
-      });
-=======
-  const user = await User.create({
-    name,
-    email: email.toLowerCase(),
+  const userData = {
+    name: normalizedName,
+    email: normalizedEmail,
     password: hashedPassword,
     role: role === "Admin" ? "Admin" : "Student",
-    phone,
-    state,
-    parentOccupation,
+    phone: phone || "",
+    state: state || "",
+    parentOccupation: parentOccupation || "",
     familyIncome: familyIncome ? Number(familyIncome) : 0,
-  });
->>>>>>> a461639 (Fix user registration flow, backend validation responses, and error handling)
+  };
+
+  let user;
+
+  if (process.env.MONGO_URI || mongoose.connection.readyState === 1) {
+    try {
+      user = await User.create(userData);
+    } catch (error) {
+      if (error.code === 11000 || error.message.includes("duplicate")) {
+        throw new Error("User email already registered.");
+      }
+      throw error;
+    }
+  } else {
+    user = await createFallbackUser(userData);
+  }
 
   const token = generateToken(user._id, user.role);
 
@@ -112,7 +121,8 @@ const loginUser = async ({ email, password }) => {
     throw new Error("Please provide email and password.");
   }
 
-  const user = await getUserByEmail(email);
+  const normalizedEmail = String(email).trim().toLowerCase();
+  const user = await getUserByEmail(normalizedEmail);
   if (!user) {
     throw new Error("Invalid credentials.");
   }
@@ -143,12 +153,13 @@ const getUserProfile = async (userId) => {
     throw new Error("User not found.");
   }
 
-  if (!process.env.MONGO_URI) {
+  if (!process.env.MONGO_URI && mongoose.connection.readyState !== 1) {
     const { password, ...safeUser } = user;
     return safeUser;
   }
 
-  return user.select("-password").populate("savedScholarships");
+  const profileUser = await User.findById(userId).select("-password").populate("savedScholarships");
+  return profileUser;
 };
 
 module.exports = {

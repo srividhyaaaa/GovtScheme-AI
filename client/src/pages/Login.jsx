@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../api/client";
+import { login as loginRequest } from "../services/authService";
+import { useAuth } from "../hooks/useAuth";
+import { getDefaultRedirect } from "../utils/authUtils";
 
 function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,34 +21,15 @@ function Login() {
     setLoading(true);
 
     try {
-      const response = await api.post("/auth/login", {
-        email: formData.email,
+      const response = await loginRequest({
+        email: formData.email.trim().toLowerCase(),
         password: formData.password,
       });
 
-      const { token, user } = response.data;
+      login(response.token, response.user);
 
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("userLoggedIn", "true");
-
-      const savedProfile = localStorage.getItem("userProfile");
-
-      if (savedProfile) {
-        try {
-          const parsedProfile = JSON.parse(savedProfile);
-          const hasProfileData = Object.values(parsedProfile).some(
-            (value) => value !== "" && value !== null && value !== undefined
-          );
-
-          navigate(hasProfileData ? "/dashboard" : "/profile");
-        } catch (parseError) {
-          console.error("Failed to parse saved profile", parseError);
-          navigate("/profile");
-        }
-      } else {
-        navigate("/profile");
-      }
+      const redirectPath = getDefaultRedirect(response.user) || "/dashboard";
+      navigate(redirectPath, { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || "Login failed. Please try again.");
     } finally {

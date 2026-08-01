@@ -25,7 +25,30 @@ function Register() {
     e.preventDefault();
     setError(null);
 
-    if (password !== confirmPassword) {
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedPassword = password.trim();
+    const trimmedPhone = phone.trim();
+    const trimmedState = state.trim();
+    const trimmedOccupation = parentOccupation.trim();
+    const normalizedIncome = familyIncome === "" ? 0 : Number(familyIncome);
+
+    if (!trimmedName) {
+      setError("Full name is required.");
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    if (trimmedPassword.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+
+    if (trimmedPassword !== confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
@@ -34,13 +57,13 @@ function Register() {
 
     try {
       const response = await registerRequest({
-        name,
-        email,
-        password,
-        phone,
-        state,
-        parentOccupation,
-        familyIncome,
+        name: trimmedName,
+        email: trimmedEmail,
+        password: trimmedPassword,
+        phone: trimmedPhone,
+        state: trimmedState,
+        parentOccupation: trimmedOccupation,
+        familyIncome: normalizedIncome,
       });
       login(response.token, response.user);
       const redirectPath = getDefaultRedirect(response.user);

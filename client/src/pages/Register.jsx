@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../api/client";
+import { register as registerRequest } from "../services/authService";
 
 function Register() {
   const navigate = useNavigate();
@@ -29,15 +29,15 @@ function Register() {
     setLoading(true);
 
     try {
-      const response = await api.post("/auth/register", {
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
+      const response = await registerRequest({
+        name: formData.name.trim(),
+        email: formData.email.trim().toLowerCase(),
+        password: formData.password.trim(),
       });
 
-      const { token, user } = response.data;
+      const { token, user } = response;
 
-      localStorage.setItem("token", token);
+      localStorage.setItem("authToken", token);
       localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("userLoggedIn", "true");
       navigate("/profile");

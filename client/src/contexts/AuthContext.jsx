@@ -46,6 +46,8 @@ function AuthProvider({ children }) {
     setAuthToken(authToken);
     setToken(authToken);
     setUser(userData);
+    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("userLoggedIn", "true");
   };
 
   const updateUser = (updatedFields) => {
@@ -56,6 +58,8 @@ function AuthProvider({ children }) {
     setAuthToken(null);
     setToken(null);
     setUser(null);
+    localStorage.removeItem("user");
+    localStorage.removeItem("userLoggedIn");
   };
 
   const value = useMemo(

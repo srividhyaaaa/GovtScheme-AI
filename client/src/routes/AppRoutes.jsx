@@ -30,16 +30,10 @@ import NotFound from "../pages/public/NotFound";
 function AppRoutes(){
 
     return (
-<<<<<<< HEAD
         <Routes>
-
             <Route path="/" element={<Home />} />
-
             <Route path="/login" element={<Login />} />
-
             <Route path="/register" element={<Register />} />
-
-
             <Route
                 path="/profile"
                 element={
@@ -48,41 +42,12 @@ function AppRoutes(){
                     </PrivateRoute>
                 }
             />
-
-
             <Route path="/schemes" element={<Schemes />} />
-
-
-            <Route 
-                path="/scheme/:id" 
-                element={<SchemeDetails />} 
-            />
-
-
-            <Route 
-                path="/scholarship/:id" 
-                element={<ScholarshipDetails />} 
-            />
-
-
-            <Route 
-                path="/recommendations" 
-                element={<AIRecommendations />} 
-            />
-
-
-            <Route 
-                path="/compare" 
-                element={<CompareSchemes />} 
-            />
-
-
-            <Route 
-                path="/roadmap" 
-                element={<Roadmap />} 
-            />
-
-
+            <Route path="/scheme/:id" element={<SchemeDetails />} />
+            <Route path="/scholarship/:id" element={<ScholarshipDetails />} />
+            <Route path="/recommendations" element={<AIRecommendations />} />
+            <Route path="/compare" element={<CompareSchemes />} />
+            <Route path="/roadmap" element={<Roadmap />} />
             <Route
                 path="/dashboard"
                 element={
@@ -91,8 +56,6 @@ function AppRoutes(){
                     </PrivateRoute>
                 }
             />
-
-
             <Route
                 path="/chat"
                 element={
@@ -101,8 +64,6 @@ function AppRoutes(){
                     </PrivateRoute>
                 }
             />
-
-
             <Route
                 path="/documents"
                 element={
@@ -111,8 +72,6 @@ function AppRoutes(){
                     </PrivateRoute>
                 }
             />
-
-
             <Route
                 path="/my-applications"
                 element={
@@ -121,8 +80,14 @@ function AppRoutes(){
                     </PrivateRoute>
                 }
             />
-
-
+            <Route
+                path="/applications"
+                element={
+                    <PrivateRoute>
+                        <MyApplications />
+                    </PrivateRoute>
+                }
+            />
             <Route
                 path="/saved-schemes"
                 element={
@@ -131,8 +96,14 @@ function AppRoutes(){
                     </PrivateRoute>
                 }
             />
-
-
+            <Route
+                path="/saved"
+                element={
+                    <PrivateRoute>
+                        <SavedSchemes />
+                    </PrivateRoute>
+                }
+            />
             <Route
                 path="/admin"
                 element={
@@ -141,97 +112,8 @@ function AppRoutes(){
                     </AdminRoute>
                 }
             />
-
-
             <Route path="*" element={<NotFound />} />
-
         </Routes>
-=======
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route
-          path="/profile"
-          element={
-            <PrivateRoute>
-              <Profile />
-            </PrivateRoute>
-          }
-        />
-        <Route path="/schemes" element={<Schemes />} />
-        <Route path="/recommendations" element={<AIRecommendations />} />
-        <Route path="/compare" element={<CompareSchemes />} />
-        <Route path="/roadmap" element={<Roadmap />} />
-        <Route path="/scheme/:id" element={<SchemeDetails />} />
-        <Route path="/scholarship/:id" element={<ScholarshipDetails />} />
-        <Route
-          path="/dashboard"
-          element={
-            <PrivateRoute>
-              <Dashboard />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/chat"
-          element={
-            <PrivateRoute>
-              <Chat />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/documents"
-          element={
-            <PrivateRoute>
-              <Documents />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/my-applications"
-          element={
-            <PrivateRoute>
-              <MyApplications />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/applications"
-          element={
-            <PrivateRoute>
-              <MyApplications />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/saved-schemes"
-          element={
-            <PrivateRoute>
-              <SavedSchemes />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/saved"
-          element={
-            <PrivateRoute>
-              <SavedSchemes />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin"
-          element={
-            <AdminRoute>
-              <AdminDashboard />
-            </AdminRoute>
-          }
-        />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
->>>>>>> a461639 (Fix user registration flow, backend validation responses, and error handling)
     );
 
 }

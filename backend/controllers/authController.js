@@ -12,7 +12,8 @@ const register = async (req, res, next) => {
       ...result,
     });
   } catch (error) {
-    res.status(400);
+    const statusCode = error.message === "User email already registered." ? 409 : 400;
+    res.status(statusCode);
     next(error);
   }
 };

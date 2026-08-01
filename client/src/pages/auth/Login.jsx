@@ -20,11 +20,16 @@ function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    const formValues = {
+      email: e.currentTarget.email?.value ?? email,
+      password: e.currentTarget.password?.value ?? password,
+    };
+
     setError(null);
     setLoading(true);
 
     try {
-      const response = await loginRequest({ email, password });
+      const response = await loginRequest(formValues);
       login(response.token, response.user);
 
       const redirectPath = getDefaultRedirect(response.user) || from;
@@ -57,6 +62,7 @@ function Login() {
             <label htmlFor="login-email">Email address</label>
             <input
               id="login-email"
+              name="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -69,6 +75,7 @@ function Login() {
             <label htmlFor="login-password">Password</label>
             <input
               id="login-password"
+              name="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
